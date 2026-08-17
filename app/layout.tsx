@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { NavLinks } from "@/components/NavLinks";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -16,7 +17,7 @@ export default function RootLayout({
       <body>
         <header className="site-header">
           <a className="brand" href="/"><span className="brand-mark">W</span><span>Wellness Wear<small>Finder</small></span></a>
-          <nav><a href="/" aria-current="page">Assessment</a><a href="/admin">Admin</a></nav>
+          <NavLinks />
         </header>
         {children}
         <footer>Wellness Wear Finder <span>·</span> Everyday comfort, thoughtfully matched.</footer>

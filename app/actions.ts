@@ -1,6 +1,6 @@
 "use server";
 
-import { createAssessment } from "@/lib/data/assessments";
+import { createAssessment, requestFitting } from "@/lib/data/assessments";
 import { getCategories } from "@/lib/data/categories";
 import { matchCategory } from "@/lib/logic/categoryMatcher";
 import { buildWhatsAppUrl } from "@/lib/logic/whatsapp";
@@ -38,4 +38,10 @@ export async function submitAssessment(input: AssessmentInput): Promise<Assessme
     reviewStatus: match.reviewStatus,
     whatsappUrl: buildWhatsAppUrl(normalizedInput, match.category),
   };
+}
+
+export async function submitFittingRequest(assessmentId: string, preferredTime: string) {
+  if (!assessmentId || !preferredTime.trim()) throw new Error("Choose a preferred fitting time.");
+  await requestFitting(assessmentId, preferredTime.trim());
+  return { saved: true };
 }

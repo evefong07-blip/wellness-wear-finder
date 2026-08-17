@@ -23,3 +23,18 @@ export type AssessmentResult = {
   reviewStatus: "unreviewed" | "needs-review";
   whatsappUrl: string;
 };
+
+export type AssessmentRow = {
+  id: string;
+  customerName: string;
+  whatsappNumber: string;
+  comfortConcern: string;
+  whenAffected: string;
+  budgetRange: string;
+  suggestedCategory: string;
+  confidence: number;
+  reviewStatus: string;
+  preferredNextStep: string | null;
+  fittingPreferredTime: string | null;
+  createdAt: string;
+};

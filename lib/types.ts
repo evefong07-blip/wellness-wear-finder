@@ -22,6 +22,8 @@ export type AssessmentResult = {
   confidence: number;
   reviewStatus: "unreviewed" | "needs-review";
   whatsappUrl: string;
+  recommendationCopy: string;
+  suggestionSource: "rule" | "ai";
 };
 
 export type AssessmentRow = {
@@ -37,4 +39,9 @@ export type AssessmentRow = {
   preferredNextStep: string | null;
   fittingPreferredTime: string | null;
   createdAt: string;
+  parsedConcern: string | null;
+  recommendationCopy: string | null;
+  suggestionSource: string;
+  leadScore: number;
+  leadScoreReasons: string[];
 };

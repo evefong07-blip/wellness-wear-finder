@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { submitAssessment } from "@/app/actions";
 import type { AssessmentInput, AssessmentResult, ProductCategory } from "@/lib/types";
 import { ResultCard } from "@/components/ResultCard";
@@ -24,6 +24,10 @@ export function AssessmentForm({ categories }: { categories: ProductCategory[] }
   const [result, setResult] = useState<AssessmentResult | null>(null);
   const [error, setError] = useState("");
   const [isPending, startTransition] = useTransition();
+
+  useEffect(() => {
+    void fetch("/api/events", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ eventType: "assessment_started" }), keepalive: true });
+  }, []);
 
   const canContinue = [
     Boolean(values.customerName.trim() && /^[689]\d{7}$/.test(values.whatsappNumber.replace(/\D/g, "").replace(/^65/, ""))),

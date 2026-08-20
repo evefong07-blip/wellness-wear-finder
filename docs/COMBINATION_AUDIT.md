@@ -45,7 +45,7 @@ These cases omit the Q3 category preference and use the category-specific Q1 and
 | Q1/Q2 need | Q4 budget | Match | Price shown | Result |
 |---|---|---|---|---|
 | Knee / walking or stairs | S$65–S$70 | Knee Supporter | S$165 | Mismatch — explained |
-| Knee / walking or stairs | S$70–S$115 | Knee Supporter | S$165 | Mismatch — explained |
+| Knee / walking or stairs | S$70–S$115 | Wellness Socks | S$70–S$115 | Correct |
 | Knee / walking or stairs | About S$165 | Knee Supporter | S$165 | Correct |
 | Knee / walking or stairs | Flexible / not sure | Knee Supporter | S$165 | Correct — flexible |
 | Feet / long hours standing | S$65–S$70 | Wellness Socks | S$70–S$115 | Mismatch — explained |
@@ -71,3 +71,5 @@ These cases use `Not sure yet` at Q1, `It varies` at Q2 and `Help me choose` at 
 ## Automated evidence
 
 The regression suite in `tests/pricingMatrix.test.ts` executes all 12 direct category/budget combinations, all 12 category-specific `Help me choose` combinations, all four `Not sure yet` fallbacks, and exact price-copy assertions. The complete project test run passes 16 test cases with no failures; the matrix tests contain 28 combination assertions in addition to the existing assessment, WhatsApp, form and dashboard tests.
+
+After deployment, all 28 combinations above were repeated through the live Chrome UI up to the non-submitting Q5 teaser. The visible category, catalogue price and budget explanation matched this table in every cell. No customer details were entered, no assessment rows were created, and the browser console reported no warnings or errors.

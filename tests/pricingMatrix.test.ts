@@ -23,6 +23,12 @@ const expectedFit: Record<string, Array<"within" | "outside" | "partial" | "flex
   eyes: ["within", "partial", "outside", "flexible"],
 };
 
+const expectedHelpMatch: Record<string, string[]> = {
+  knee: ["knee", "socks", "knee", "knee"],
+  socks: ["socks", "socks", "socks", "socks"],
+  eyes: ["eyes", "eyes", "eyes", "eyes"],
+};
+
 test("checks every direct category × budget combination", () => {
   for (const scenario of scenarios) {
     for (const [budgetIndex, budget] of budgets.entries()) {
@@ -41,9 +47,10 @@ test("checks every direct category × budget combination", () => {
 
 test("Help me choose stays internally consistent for every concern × budget", () => {
   for (const scenario of scenarios) {
-    for (const budget of budgets) {
+    for (const [budgetIndex, budget] of budgets.entries()) {
       const result = matchCategory(categories, { ...scenario, budget, preferredCategoryId: null });
       const guidance = getPriceGuidance(result.category, budget);
+      assert.equal(result.category.id, expectedHelpMatch[scenario.id][budgetIndex]);
       assert.ok(guidance.cataloguePrice.includes("S$"));
       if (guidance.fit === "outside" || guidance.fit === "partial") {
         assert.match(guidance.explanation, /Budget mismatch/);

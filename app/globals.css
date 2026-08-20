@@ -78,6 +78,9 @@ input:focus { border-color:var(--green); box-shadow:0 0 0 3px rgba(40,92,77,.1);
 .button.fitting { background:white; border:1px solid var(--green); color:var(--green); width:100%; margin-top:10px; }
 .fitting-form { width:100%; text-align:left; background:#f1f4ef; border-radius:15px; padding:14px 18px 18px; margin-top:10px; }
 .fitting-form label { margin:0 0 12px; }
+.fitting-fields { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:10px; }
+.fitting-fields input,.fitting-fields select { width:100%; min-width:0; min-height:52px; margin-top:8px; border:1px solid var(--line); background:white; color:var(--ink); border-radius:13px; padding:0 13px; outline:none; }
+.fitting-fields input:focus,.fitting-fields select:focus { border-color:var(--green); box-shadow:0 0 0 3px rgba(40,92,77,.1); }
 .fitting-form .button { width:100%; }
 .success-banner { width:100%; display:flex; flex-direction:column; gap:4px; text-align:left; background:#e5f2e8; color:#1d5944; border-radius:14px; padding:15px 18px; margin-top:11px; font-size:13px; }
 .success-banner span { color:#54736a; font-size:12px; }
@@ -217,6 +220,7 @@ footer span { padding:0 8px; }
   .result-card { padding-top:28px; }
   .result-icon { margin-bottom:17px; }
   .match-note { padding:16px; margin:16px 0 20px; }
+  .fitting-fields { grid-template-columns:1fr; gap:0; }
   .login-main { min-height:calc(100vh - 126px); padding:24px 12px 40px; }
   .login-card { border-radius:20px; padding:28px 18px; }
   .login-card h1 { font-size:36px; }

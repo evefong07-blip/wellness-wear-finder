@@ -6,6 +6,7 @@ import { submitAssessment } from "@/app/actions";
 import type { AssessmentInput, AssessmentResult, ProductCategory } from "@/lib/types";
 import { ResultCard } from "@/components/ResultCard";
 import { matchCategory } from "@/lib/logic/categoryMatcher";
+import { isValidSingaporeMobile } from "@/lib/logic/form";
 
 const concerns = [
   "Knee comfort during walking, standing or stairs",
@@ -47,7 +48,7 @@ export function AssessmentForm({ categories }: { categories: ProductCategory[] }
     Boolean(values.whenAffected),
     categoryChoiceMade,
     Boolean(values.budgetRange),
-    Boolean(values.customerName.trim() && /^[689]\d{7}$/.test(values.whatsappNumber.replace(/\D/g, "").replace(/^65/, ""))),
+    Boolean(values.customerName.trim() && isValidSingaporeMobile(values.whatsappNumber)),
   ][step];
 
   const previewMatch = step === 4 && categories.length
@@ -125,11 +126,11 @@ export function AssessmentForm({ categories }: { categories: ProductCategory[] }
           <label>Singapore WhatsApp number
             <div className="phone-field">
               <select aria-label="Country code" defaultValue="+65"><option value="+65">SG +65</option></select>
-              <input aria-label="WhatsApp number" value={values.whatsappNumber} onChange={(event) => choose("whatsappNumber", event.target.value)} placeholder="8123 4567" inputMode="tel" autoComplete="tel" />
+              <input aria-label="WhatsApp number" defaultValue={values.whatsappNumber} onInput={(event) => choose("whatsappNumber", event.currentTarget.value)} placeholder="8123 4567" inputMode="tel" autoComplete="tel" />
             </div>
           </label>
           <p className="consent-copy">We’ll only send your result summary via WhatsApp—no spam.</p>
-          {values.whatsappNumber && !/^[689]\d{7}$/.test(values.whatsappNumber.replace(/\D/g, "").replace(/^65/, "")) && <p className="field-error">Use an 8-digit Singapore mobile number starting with 6, 8 or 9.</p>}
+          {values.whatsappNumber && !isValidSingaporeMobile(values.whatsappNumber) && <p className="field-error">Use an 8-digit Singapore mobile number starting with 6, 8 or 9.</p>}
         </div>
       )}
 

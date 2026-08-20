@@ -43,7 +43,7 @@ test("builds a Singapore WhatsApp deep link and summary", () => {
 
 test("routes enquiries to the distributor instead of the visitor", () => {
   const url = buildWhatsAppUrl({ customerName: "Sarah Tan", whatsappNumber: "81234567", comfortConcern: "Knee comfort", whenAffected: "Walking", budgetRange: "About S$165", preferredCategoryId: null }, categories[0]);
-  assert.match(url, /^https:\/\/wa\.me\/6596324713\?text=/);
+  assert.match(url, /^https:\/\/wa\.me\/6580208895\?text=/);
   assert.doesNotMatch(url, /^https:\/\/wa\.me\/6581234567\?text=/);
   assert.match(decodeURIComponent(url), /6581234567/);
 });

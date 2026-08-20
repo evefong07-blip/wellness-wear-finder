@@ -1,6 +1,6 @@
 import type { AssessmentInput, ProductCategory } from "@/lib/types";
 
-export const DISTRIBUTOR_WHATSAPP_NUMBER = "96324713";
+export const DISTRIBUTOR_WHATSAPP_NUMBER = "80208895";
 
 export function normalizeSingaporeNumber(value: string): string {
   const digits = value.replace(/\D/g, "");

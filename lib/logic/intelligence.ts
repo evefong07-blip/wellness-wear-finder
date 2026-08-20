@@ -15,14 +15,14 @@ export function structureAssessment(input: AssessmentInput, category: ProductCat
   const concern = input.comfortConcern.toLowerCase();
   const timing = input.whenAffected.toLowerCase();
   const [budgetMin, rawBudgetMax] = parseBudget(input.budgetRange);
-  const parsedConcern = concern.includes("posture") || concern.includes("back") ? "posture_support"
-    : concern.includes("leg") || concern.includes("lower") ? "lower_body_comfort"
-      : concern.includes("sleep") || concern.includes("relax") ? "sleep_relaxation"
-        : concern.includes("muscle") || concern.includes("recover") ? "active_recovery" : "general_comfort";
-  const parsedTiming = timing.includes("all day") || timing.includes("work") ? "all_day"
-    : timing.includes("night") ? "night"
-      : timing.includes("exercise") ? "after_exercise"
-        : timing.includes("morning") ? "morning" : "variable";
+  const parsedConcern = concern.includes("knee") ? "knee_comfort"
+    : concern.includes("foot") || concern.includes("feet") || concern.includes("leg") ? "foot_leg_comfort"
+      : concern.includes("eye") || concern.includes("rest") || concern.includes("sleep") ? "eye_rest"
+        : "general_comfort";
+  const parsedTiming = timing.includes("walking") || timing.includes("stairs") ? "during_movement"
+    : timing.includes("standing") ? "after_standing"
+      : timing.includes("bedtime") || timing.includes("rest") ? "rest_time"
+        : timing.includes("long day") ? "after_day" : "variable";
   const budgetMax = Number.isFinite(rawBudgetMax) ? rawBudgetMax : Math.max(budgetMin, 200);
 
   return {
@@ -43,6 +43,6 @@ export function scoreLead(input: AssessmentInput, confidence: number): LeadScore
   if (budgetMax >= 100) { score += 25; reasons.push("Budget fits core ranges"); }
   else if (budgetMax >= 50) { score += 15; reasons.push("Active purchase budget"); }
   if (input.preferredCategoryId) { score += 15; reasons.push("Expressed category preference"); }
-  if (/posture|back|sleep|leg|muscle|recover/i.test(input.comfortConcern)) { score += 15; reasons.push("Specific comfort need"); }
+  if (/knee|feet|foot|leg|eye|rest|sleep/i.test(input.comfortConcern)) { score += 15; reasons.push("Specific comfort need"); }
   return { score: Math.min(100, score), reasons };
 }

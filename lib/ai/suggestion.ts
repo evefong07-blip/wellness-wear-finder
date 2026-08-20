@@ -34,8 +34,8 @@ export async function getAiSuggestion(
               type: "object",
               additionalProperties: false,
               properties: {
-                parsedConcern: { type: "string", enum: ["posture_support", "lower_body_comfort", "sleep_relaxation", "active_recovery", "general_comfort"] },
-                parsedTiming: { type: "string", enum: ["all_day", "night", "after_exercise", "morning", "variable"] },
+                parsedConcern: { type: "string", enum: ["knee_comfort", "foot_leg_comfort", "eye_rest", "general_comfort"] },
+                parsedTiming: { type: "string", enum: ["during_movement", "after_standing", "after_day", "rest_time", "variable"] },
                 parsedBudgetMin: { type: "number" },
                 parsedBudgetMax: { type: "number" },
                 suggestedCategoryId: { type: "string", enum: categoryIds },

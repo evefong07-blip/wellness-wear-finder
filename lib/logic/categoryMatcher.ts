@@ -10,7 +10,11 @@ export type CategoryMatch = {
 export function parseBudget(range: string): [number, number] {
   const values = range.match(/\d+/g)?.map(Number) ?? [];
   if (!values.length) return [0, Number.POSITIVE_INFINITY];
-  if (values.length === 1) return [0, values[0]];
+  if (values.length === 1) {
+    if (/under|below|up to/i.test(range)) return [0, values[0]];
+    if (/\+|above|over|from/i.test(range)) return [values[0], Number.POSITIVE_INFINITY];
+    return [values[0], values[0]];
+  }
   return [Math.min(values[0], values[1]), Math.max(values[0], values[1])];
 }
 

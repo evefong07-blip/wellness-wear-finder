@@ -5,9 +5,15 @@ import { submitAssessment } from "@/app/actions";
 import type { AssessmentInput, AssessmentResult, ProductCategory } from "@/lib/types";
 import { ResultCard } from "@/components/ResultCard";
 
-const concerns = ["Posture / back support", "Tired legs / lower-body comfort", "Sleep / relaxation", "Muscle recovery", "Something else"];
-const timings = ["All day at work", "Mornings", "After work", "After exercise", "At night"];
-const budgets = ["Under $50", "$50-$100", "$100-$150", "$150+"];
+const concerns = [
+  "Knee comfort during walking, standing or stairs",
+  "Feet or lower-leg comfort after a long day",
+  "Resting my eyes or winding down",
+  "Everyday warmth and comfort",
+  "Not sure yet",
+];
+const timings = ["During walking or stairs", "After long hours standing", "After a long day", "At bedtime or while resting", "It varies"];
+const budgets = ["S$65-S$70", "S$70-S$115", "About S$165", "I’m flexible / not sure"];
 
 const initialValues: AssessmentInput = {
   customerName: "",

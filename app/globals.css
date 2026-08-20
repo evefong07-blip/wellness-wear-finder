@@ -29,17 +29,19 @@ label { display:block; font-size:13px; font-weight:800; margin:18px 0; }
 input { width:100%; border:1px solid var(--line); background:white; border-radius:13px; padding:15px 16px; margin-top:8px; color:var(--ink); outline:none; }
 input:focus { border-color:var(--green); box-shadow:0 0 0 3px rgba(40,92,77,.1); }
 .choice-grid { display:grid; gap:10px; margin-top:25px; }
-.choice { width:100%; border:1px solid var(--line); background:white; color:var(--ink); border-radius:14px; padding:15px 17px; text-align:left; display:flex; align-items:center; gap:12px; cursor:pointer; transition:.18s; }
+.choice { position:relative; width:100%; border:1px solid var(--line); background:white; color:var(--ink); border-radius:14px; padding:15px 17px; text-align:left; display:flex; align-items:center; gap:12px; cursor:pointer; transition:.18s; }
 .choice:hover { border-color:#a8bcb2; transform:translateY(-1px); }
-.choice.selected { background:#eef4ee; border-color:var(--green); box-shadow:inset 0 0 0 1px var(--green); }
+.choice.selected { background:#dfece3; border-color:var(--green); box-shadow:inset 0 0 0 2px var(--green); }
+.choice.selected::after { content:"✓"; width:22px; height:22px; flex:0 0 auto; display:grid; place-items:center; margin-left:auto; border-radius:50%; background:var(--green); color:white; font-size:12px; font-weight:900; }
 .choice strong { font-size:14px; }
 .choice span:not(.radio-dot) { display:block; color:var(--muted); font-size:12px; line-height:1.4; margin-left:auto; max-width:55%; }
 .radio-dot { width:17px; height:17px; border:2px solid #aebbb5; border-radius:50%; flex:0 0 auto; }
 .selected .radio-dot { border:5px solid var(--green); }
 .category-choice-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:11px; margin-top:24px; }
-.category-choice { min-width:0; border:1px solid var(--line); background:white; color:var(--ink); border-radius:16px; padding:0; overflow:hidden; text-align:left; cursor:pointer; transition:.18s; }
+.category-choice { position:relative; min-width:0; border:1px solid var(--line); background:white; color:var(--ink); border-radius:16px; padding:0; overflow:hidden; text-align:left; cursor:pointer; transition:.18s; }
 .category-choice:hover { border-color:#a8bcb2; transform:translateY(-2px); }
-.category-choice.selected { border-color:var(--green); box-shadow:0 0 0 2px var(--green); background:#eef4ee; }
+.category-choice.selected { border-color:var(--green); box-shadow:0 0 0 3px var(--green); background:#dfece3; }
+.category-choice.selected::after { content:"✓"; position:absolute; top:9px; right:9px; width:27px; height:27px; display:grid; place-items:center; border-radius:50%; background:var(--green); color:white; box-shadow:0 2px 8px rgba(24,51,45,.28); font-size:14px; font-weight:900; }
 .category-choice>img { display:block; width:100%; height:auto; aspect-ratio:1.2/1; object-fit:cover; }
 .category-choice>span { display:block; padding:12px; }
 .category-choice strong { display:block; font-size:13px; line-height:1.25; }
@@ -52,6 +54,11 @@ input:focus { border-color:var(--green); box-shadow:0 0 0 3px rgba(40,92,77,.1);
 .match-teaser strong { display:block; font:500 24px/1.15 Georgia,serif; margin:4px 0 6px; }
 .match-teaser small { display:block; color:var(--muted); font-size:11px; line-height:1.4; }
 .contact-step .question-copy { margin-bottom:18px; }
+.phone-field { display:grid; grid-template-columns:92px minmax(0,1fr); gap:8px; margin-top:8px; }
+.phone-field select,.phone-field input { min-width:0; min-height:52px; margin:0; border:1px solid var(--line); background:white; color:var(--ink); border-radius:13px; padding:0 13px; outline:none; }
+.phone-field select { appearance:none; background-image:linear-gradient(45deg,transparent 50%,var(--muted) 50%),linear-gradient(135deg,var(--muted) 50%,transparent 50%); background-position:calc(100% - 14px) 22px,calc(100% - 10px) 22px; background-size:4px 4px,4px 4px; background-repeat:no-repeat; font-size:13px; font-weight:700; }
+.phone-field input:focus,.phone-field select:focus { border-color:var(--green); box-shadow:0 0 0 3px rgba(40,92,77,.1); }
+.consent-copy { color:var(--muted); font-size:11px; line-height:1.45; margin:-7px 0 13px; }
 .form-actions { display:flex; justify-content:flex-end; gap:10px; margin-top:28px; }
 .button { min-height:49px; border:0; border-radius:999px; padding:0 23px; display:inline-flex; align-items:center; justify-content:center; gap:16px; font-weight:800; font-size:14px; cursor:pointer; text-decoration:none; }
 .button.primary { background:var(--green); color:white; }

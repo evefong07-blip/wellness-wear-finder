@@ -123,7 +123,13 @@ export function AssessmentForm({ categories }: { categories: ProductCategory[] }
           </div>
           <p className="question-copy">Add your details to save the full recommendation and choose WhatsApp or a private fitting next.</p>
           <label>Your name<input autoFocus value={values.customerName} onChange={(event) => choose("customerName", event.target.value)} placeholder="Sarah Tan" autoComplete="name" /></label>
-          <label>Singapore WhatsApp number<input value={values.whatsappNumber} onChange={(event) => choose("whatsappNumber", event.target.value)} placeholder="8123 4567" inputMode="tel" autoComplete="tel" /></label>
+          <label>Singapore WhatsApp number
+            <div className="phone-field">
+              <select aria-label="Country code" defaultValue="+65"><option value="+65">SG +65</option></select>
+              <input aria-label="WhatsApp number" value={values.whatsappNumber} onChange={(event) => choose("whatsappNumber", event.target.value)} placeholder="8123 4567" inputMode="tel" autoComplete="tel" />
+            </div>
+          </label>
+          <p className="consent-copy">We’ll only send your result summary via WhatsApp—no spam.</p>
           {values.whatsappNumber && !/^[689]\d{7}$/.test(values.whatsappNumber.replace(/\D/g, "").replace(/^65/, "")) && <p className="field-error">Use an 8-digit Singapore mobile number starting with 6, 8 or 9.</p>}
         </div>
       )}
@@ -131,7 +137,7 @@ export function AssessmentForm({ categories }: { categories: ProductCategory[] }
       {error && <div className="error-banner" role="alert">{error}</div>}
       <div className="form-actions">
         {step > 0 && <button className="button secondary" type="button" onClick={() => setStep((current) => current - 1)} disabled={isPending}>Back</button>}
-        {step < 4 ? <button className="button primary" type="button" onClick={() => setStep((current) => current + 1)} disabled={!canContinue}>Continue <span>→</span></button> : <button className="button primary" type="button" onClick={finish} disabled={!canContinue || isPending}>{isPending ? "Saving your match…" : "See my full match →"}</button>}
+        {step < 4 ? <button className="button primary" type="button" onClick={() => setStep((current) => current + 1)} disabled={!canContinue}>Continue <span>→</span></button> : <button className="button primary" type="button" onClick={finish} disabled={!canContinue || isPending}>{isPending ? "Preparing your match…" : "Get My Custom Match →"}</button>}
       </div>
       <p className="privacy-note">No diagnosis or health claims — just practical category guidance based on your preferences.</p>
     </section>

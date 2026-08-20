@@ -5,7 +5,7 @@ const demoCategories: ProductCategory[] = [
   {
     id: "demo-knee-supporter",
     name: "Knee Supporter",
-    description: "A pair of knee supporters for everyday comfort during walking, standing and stairs. Catalogue price: S$165.",
+    description: "Everyday knee comfort for walking, standing and stairs.",
     match_keywords: ["knee", "knees", "walking", "stairs", "joint", "support"],
     budget_min: 165,
     budget_max: 165,
@@ -13,7 +13,7 @@ const demoCategories: ProductCategory[] = [
   {
     id: "demo-wellness-socks",
     name: "Wellness Socks",
-    description: "Adult sock options for everyday foot and lower-leg comfort. Catalogue range: S$70-S$115.",
+    description: "Everyday foot and lower-leg comfort after a long day.",
     match_keywords: ["feet", "foot", "legs", "lower-leg", "standing", "socks", "long day"],
     budget_min: 70,
     budget_max: 115,
@@ -21,7 +21,7 @@ const demoCategories: ProductCategory[] = [
   {
     id: "demo-wellness-eye-mask",
     name: "Wellness Eye Mask",
-    description: "Eye mask options for quiet rest, travel and winding down. Catalogue range: S$65-S$70.",
+    description: "Quiet eye rest for travel, bedtime and winding down.",
     match_keywords: ["eye", "eyes", "sleep", "night", "rest", "bedtime", "winding down"],
     budget_min: 65,
     budget_max: 70,

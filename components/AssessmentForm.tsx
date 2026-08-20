@@ -11,7 +11,6 @@ const concerns = [
   "Knee comfort during walking, standing or stairs",
   "Feet or lower-leg comfort after a long day",
   "Resting my eyes or winding down",
-  "Everyday warmth and comfort",
   "Not sure yet",
 ];
 const timings = ["During walking or stairs", "After long hours standing", "After a long day", "At bedtime or while resting", "It varies"];

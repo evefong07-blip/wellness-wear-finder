@@ -7,7 +7,6 @@ import type { AssessmentInput, AssessmentResult, ProductCategory } from "@/lib/t
 import { ResultCard } from "@/components/ResultCard";
 import { matchCategory } from "@/lib/logic/categoryMatcher";
 import { isValidSingaporeMobile } from "@/lib/logic/form";
-import { getPriceGuidance } from "@/lib/logic/pricing";
 
 const concerns = [
   "Knee comfort during walking, standing or stairs",
@@ -60,7 +59,6 @@ export function AssessmentForm({ categories }: { categories: ProductCategory[] }
       preferredCategoryId: values.preferredCategoryId,
     }).category
     : null;
-  const previewPrice = previewMatch ? getPriceGuidance(previewMatch, values.budgetRange) : null;
 
   function choose(field: keyof AssessmentInput, value: string | null) {
     setError("");
@@ -121,9 +119,8 @@ export function AssessmentForm({ categories }: { categories: ProductCategory[] }
           <h2 id="assessment-title">Here’s your likely starting point.</h2>
           <div className="match-teaser">
             <Image src={categoryImages[previewMatch.name] ?? "/images/category-knee-comfort.webp"} alt="" width={120} height={120} />
-            <div><span>Your likely match</span><strong>{previewMatch.name}</strong><small>{previewPrice?.cataloguePrice}</small></div>
+            <div><span>Your likely match</span><strong>{previewMatch.name}</strong><small>{formatPrice(previewMatch)}</small></div>
           </div>
-          {previewPrice && <p className={`budget-guidance ${previewPrice.fit === "partial" || previewPrice.fit === "outside" ? "mismatch" : ""}`}>{previewPrice.explanation}</p>}
           <p className="question-copy">Add your details to save the full recommendation and choose WhatsApp or a private fitting next.</p>
           <label>Your name<input autoFocus value={values.customerName} onChange={(event) => choose("customerName", event.target.value)} placeholder="Sarah Tan" autoComplete="name" /></label>
           <label>Singapore WhatsApp number
@@ -149,6 +146,12 @@ export function AssessmentForm({ categories }: { categories: ProductCategory[] }
 
 function ChoiceQuestion({ eyebrow, title, copy, options, value, onChange }: { eyebrow: string; title: string; copy: string; options: string[]; value: string; onChange: (value: string) => void }) {
   return <div className="question-panel"><p className="eyebrow">{eyebrow}</p><h2>{title}</h2><p className="question-copy">{copy}</p><div className="choice-grid">{options.map((option) => <button type="button" key={option} className={value === option ? "choice selected" : "choice"} onClick={() => onChange(option)}><span className="radio-dot" /> <strong>{option}</strong></button>)}</div></div>;
+}
+
+function formatPrice(category: ProductCategory) {
+  if (category.budget_min === null) return "Price confirmed during your private chat";
+  if (category.budget_max === null || category.budget_max === category.budget_min) return `Typical catalogue price: S$${category.budget_min}`;
+  return `Typical catalogue range: S$${category.budget_min}–S$${category.budget_max}`;
 }
 
 function categoryImageAlt(name: string) {

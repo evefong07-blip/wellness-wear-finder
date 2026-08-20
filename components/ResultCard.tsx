@@ -4,7 +4,6 @@ import { useState, useTransition } from "react";
 import { submitFittingRequest } from "@/app/actions";
 import type { AssessmentResult } from "@/lib/types";
 import { combinePreferredDateTime, singaporeDateValue } from "@/lib/logic/form";
-import { getPriceGuidance } from "@/lib/logic/pricing";
 
 const fittingTimes = Array.from({ length: 25 }, (_, index) => {
   const totalMinutes = 9 * 60 + index * 30;
@@ -23,7 +22,6 @@ export function ResultCard({ result, onRestart }: { result: AssessmentResult; on
   const [error, setError] = useState("");
   const [isPending, startTransition] = useTransition();
   const preferredTime = combinePreferredDateTime(preferredDate, preferredClock);
-  const priceGuidance = getPriceGuidance(result.category, result.budgetRange);
 
   function saveFitting() {
     setError("");
@@ -43,8 +41,7 @@ export function ResultCard({ result, onRestart }: { result: AssessmentResult; on
       <p className="eyebrow">Your everyday comfort match</p>
       <h2>{result.category.name}</h2>
       <p className="result-description">{result.recommendationCopy || result.category.description}</p>
-      <div className={`price-summary ${priceGuidance.fit === "partial" || priceGuidance.fit === "outside" ? "mismatch" : ""}`}><strong>{priceGuidance.cataloguePrice}</strong><p>{priceGuidance.explanation}</p></div>
-      <div className="match-note"><span>Why this match</span><p>Your comfort need, routine and stated preference aligned most closely with this category. This is practical guidance, not medical advice.</p></div>
+      <div className="match-note"><span>Why this match</span><p>Your concern, routine and budget aligned most closely with this category. This is practical guidance, not medical advice.</p></div>
       <a className="button whatsapp" href={result.whatsappUrl} target="_blank" rel="noreferrer" onClick={() => { void fetch("/api/events", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ eventType: "whatsapp_clicked", assessmentId: result.assessmentId }), keepalive: true }); }}>Continue on WhatsApp <span>↗</span></a>
       {!saved && <button className="button fitting" type="button" onClick={() => setShowFitting((value) => !value)}>Request a private fitting</button>}
       {showFitting && !saved && <div className="fitting-form">

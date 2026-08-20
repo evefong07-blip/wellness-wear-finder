@@ -7,6 +7,8 @@ export type CategoryMatch = {
   reviewStatus: "unreviewed" | "needs-review";
 };
 
+export type BudgetFit = "within" | "partial" | "outside" | "flexible" | "unknown";
+
 export function parseBudget(range: string): [number, number] {
   const values = range.match(/\d+/g)?.map(Number) ?? [];
   if (!values.length) return [0, Number.POSITIVE_INFINITY];
@@ -18,6 +20,18 @@ export function parseBudget(range: string): [number, number] {
   return [Math.min(values[0], values[1]), Math.max(values[0], values[1])];
 }
 
+export function getBudgetFit(category: ProductCategory, range: string): BudgetFit {
+  if (!range.match(/\d/)) return "flexible";
+  if (category.budget_min === null || category.budget_max === null) return "unknown";
+
+  const [budgetMin, budgetMax] = parseBudget(range);
+  const fullyWithin = category.budget_min >= budgetMin && category.budget_max <= budgetMax;
+  if (fullyWithin) return "within";
+
+  const overlaps = category.budget_max >= budgetMin && category.budget_min <= budgetMax;
+  return overlaps ? "partial" : "outside";
+}
+
 export function matchCategory(
   categories: ProductCategory[],
   answers: { concern: string; timing: string; budget: string; preferredCategoryId: string | null },
@@ -26,19 +40,17 @@ export function matchCategory(
 
   const concern = answers.concern.toLowerCase();
   const timing = answers.timing.toLowerCase();
-  const [budgetMin, budgetMax] = parseBudget(answers.budget);
   const ranked = categories
     .map((category) => {
       const keywords = category.match_keywords ?? [];
       const concernMatch = keywords.some((keyword) => concern.includes(keyword.toLowerCase()));
       const timingMatch = keywords.some((keyword) => timing.includes(keyword.toLowerCase()));
-      const categoryMin = category.budget_min ?? 0;
-      const categoryMax = category.budget_max ?? Number.POSITIVE_INFINITY;
-      const budgetMatches = budgetMax >= categoryMin && budgetMin <= categoryMax;
+      const budgetFit = getBudgetFit(category, answers.budget);
+      const budgetScore = budgetFit === "within" || budgetFit === "flexible" ? 2 : budgetFit === "partial" ? 1 : 0;
       const score =
         (concernMatch ? 3 : 0) +
         (timingMatch ? 1 : 0) +
-        (budgetMatches ? 2 : 0) +
+        budgetScore +
         (answers.preferredCategoryId === category.id ? 2 : 0);
       return { category, score };
     })

@@ -53,5 +53,6 @@ export async function processAssessment(input: AssessmentInput): Promise<Assessm
     whatsappUrl: buildWhatsAppUrl(normalizedInput, suggestedCategory),
     recommendationCopy: structured.recommendationCopy,
     suggestionSource: aiSuggestion ? "ai" : "rule",
+    budgetRange: input.budgetRange,
   };
 }

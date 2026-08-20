@@ -24,6 +24,7 @@ export type AssessmentResult = {
   whatsappUrl: string;
   recommendationCopy: string;
   suggestionSource: "rule" | "ai";
+  budgetRange: string;
 };
 
 export type AssessmentRow = {

@@ -74,6 +74,13 @@ input:focus { border-color:var(--green); box-shadow:0 0 0 3px rgba(40,92,77,.1);
 .match-note { text-align:left; background:#f1f4ef; padding:18px 20px; border-radius:14px; margin:20px 0 26px; width:100%; }
 .match-note span { font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:.12em; color:var(--green); }
 .match-note p { color:var(--muted); font-size:13px; line-height:1.5; margin:7px 0 0; }
+.budget-guidance,.price-summary { border:1px solid #c9d8d0; background:#eef5f1; color:var(--ink); border-radius:13px; padding:11px 13px; line-height:1.5; }
+.budget-guidance { margin:10px 0 0; font-size:13px; }
+.price-summary { width:100%; text-align:left; margin-top:14px; }
+.price-summary strong { display:block; margin-bottom:4px; }
+.price-summary p { margin:0; color:var(--muted); }
+.budget-guidance.mismatch,.price-summary.mismatch { border-color:#e0a38f; background:#fff0eb; color:#87432f; }
+.price-summary.mismatch p { color:#87432f; }
 .button.whatsapp { background:#196b51; color:white; width:100%; }
 .button.fitting { background:white; border:1px solid var(--green); color:var(--green); width:100%; margin-top:10px; }
 .fitting-form { width:100%; text-align:left; background:#f1f4ef; border-radius:15px; padding:14px 18px 18px; margin-top:10px; }

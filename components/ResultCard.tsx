@@ -5,7 +5,7 @@ import { submitFittingRequest } from "@/app/actions";
 import type { AssessmentResult } from "@/lib/types";
 import { combinePreferredDateTime, singaporeDateValue } from "@/lib/logic/form";
 import { describeBudgetFit, formatEstimatedPrice, getBudgetFit } from "@/lib/logic/budget";
-import { addFittingRequestToWhatsAppUrl } from "@/lib/logic/whatsapp";
+import { buildFittingWhatsAppUrl } from "@/lib/logic/whatsapp";
 import { undecidedPresentation } from "@/lib/logic/undecided";
 
 const fittingTimes = Array.from({ length: 25 }, (_, index) => {
@@ -26,7 +26,7 @@ export function ResultCard({ result, onRestart }: { result: AssessmentResult; on
   const [isPending, startTransition] = useTransition();
   const preferredTime = combinePreferredDateTime(preferredDate, preferredClock);
   const budgetFit = result.category ? getBudgetFit(result.category, result.budgetRange) : "unknown";
-  const whatsappUrl = saved ? addFittingRequestToWhatsAppUrl(result.whatsappUrl, preferredTime) : result.whatsappUrl;
+  const fittingWhatsAppUrl = saved ? buildFittingWhatsAppUrl(preferredTime) : null;
   const isConsultation = result.outcome === "consultation";
 
   function saveFitting() {
@@ -56,7 +56,7 @@ export function ResultCard({ result, onRestart }: { result: AssessmentResult; on
         <div className={`price-summary ${budgetFit === "outside" ? "outside" : ""}`}><strong>{formatEstimatedPrice(result.category)}</strong><p>{describeBudgetFit(result.category, result.budgetRange, result.category.id === result.preferredCategoryId)}</p></div>
         <div className="match-note"><span>Why this match</span><p>Your comfort need and routine aligned most closely with this category. This is practical guidance, not medical advice.</p></div>
       </>}
-      <a className="button whatsapp" href={whatsappUrl} target="_blank" rel="noreferrer" onClick={() => { void fetch("/api/events", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ eventType: "whatsapp_clicked", assessmentId: result.assessmentId }), keepalive: true }); }}>{isConsultation ? undecidedPresentation.primaryAction : "Continue on WhatsApp"} <span>↗</span></a>
+      <a className="button whatsapp" href={result.whatsappUrl} target="_blank" rel="noreferrer" onClick={() => { void fetch("/api/events", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ eventType: "whatsapp_clicked", assessmentId: result.assessmentId }), keepalive: true }); }}>{isConsultation ? undecidedPresentation.primaryAction : "Continue on WhatsApp"} <span>↗</span></a>
       {!saved && <button className="button fitting" type="button" onClick={() => setShowFitting((value) => !value)}>{isConsultation ? undecidedPresentation.secondaryAction : "Request a private fitting"}</button>}
       {showFitting && !saved && <div className="fitting-form">
         <div className="fitting-fields">
@@ -66,7 +66,7 @@ export function ResultCard({ result, onRestart }: { result: AssessmentResult; on
         {error && <div className="error-banner" role="alert">{error}</div>}
         <button type="button" className="button primary" onClick={saveFitting} disabled={!preferredTime || isPending}>{isPending ? "Saving…" : "Save fitting request"}</button>
       </div>}
-      {saved && <div className="success-banner" role="status"><strong>Fitting request saved.</strong><span>The distributor can now see your preferred time and follow up with you.</span></div>}
+      {saved && <><div className="success-banner" role="status"><strong>Fitting request saved.</strong><span>Your separate WhatsApp request is ready for you to review.</span></div><a className="button fitting" href={fittingWhatsAppUrl ?? undefined} target="_blank" rel="noreferrer">Request a private fitting <span>↗</span></a></>}
       <p className="result-footnote">Your assessment has been saved. The message opens in your WhatsApp for you to review before sending.</p>
       <button className="text-button" type="button" onClick={onRestart}>Start another assessment</button>
     </section>

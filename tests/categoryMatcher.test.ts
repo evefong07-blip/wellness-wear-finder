@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { matchCategory, parseBudget } from "../lib/logic/categoryMatcher.ts";
 import { describeBudgetFit, formatEstimatedPrice, getBudgetFit } from "../lib/logic/budget.ts";
-import { addFittingRequestToWhatsAppUrl, buildWhatsAppUrl, normalizeSingaporeNumber } from "../lib/logic/whatsapp.ts";
+import { buildFittingWhatsAppUrl, buildWhatsAppUrl, normalizeSingaporeNumber } from "../lib/logic/whatsapp.ts";
 import type { ProductCategory } from "../lib/types.ts";
 
 const categories: ProductCategory[] = [
@@ -82,23 +82,25 @@ test("explains above, below, overlap and fit without false alignment language", 
   for (const message of [above, below]) assert.doesNotMatch(message, /aligned/i);
 });
 
-test("routes WhatsApp to the distributor with answers, product and catalogue price", () => {
+test("routes a natural product-result message to the distributor without the visitor number", () => {
   assert.equal(normalizeSingaporeNumber("8123 4567"), "6581234567");
   const url = buildWhatsAppUrl({ customerName: "Sarah Tan", whatsappNumber: "81234567", comfortConcern: "Knee comfort", whenAffected: "Walking", budgetRange: "S$80–S$120", preferredCategoryId: null }, categories[0]);
-  const decoded = decodeURIComponent(url);
+  const parsed = new URL(url);
+  const message = parsed.searchParams.get("text") ?? "";
   assert.match(url, /^https:\/\/wa\.me\/6580208895\?text=/);
   assert.doesNotMatch(url, /^https:\/\/wa\.me\/6581234567\?text=/);
-  assert.match(decoded, /Sarah Tan/);
-  assert.match(decoded, /Knee Supporter/);
-  assert.match(decoded, /S\$200–S\$220/);
-  assert.match(decoded, /6581234567/);
-  assert.match(decoded, /Requested next step: WhatsApp follow-up/);
+  assert.match(message, /Comfort need: Knee comfort/);
+  assert.match(message, /Routine: Walking/);
+  assert.match(message, /Budget: S\$80–S\$120/);
+  assert.match(message, /Suggested option: Knee Supporter/);
+  assert.match(message, /S\$200–S\$220/);
+  assert.doesNotMatch(message, /Sarah Tan|81234567|6581234567|private fitting|learn more\.Hi/i);
 });
 
-test("adds a saved private-fitting request to the WhatsApp summary", () => {
-  const base = buildWhatsAppUrl({ customerName: "Sarah", whatsappNumber: "81234567", comfortConcern: "Feet", whenAffected: "After a long day", budgetRange: "S$80–S$120", preferredCategoryId: "socks" }, categories[1]);
-  const updated = addFittingRequestToWhatsAppUrl(base, "2026-08-24T14:00");
-  const parsed = new URL(updated);
-  assert.match(parsed.searchParams.get("text") ?? "", /Private fitting requested: 2026-08-24 at 14:00/);
+test("builds a separate fitting-only message after a time is selected", () => {
+  const parsed = new URL(buildFittingWhatsAppUrl("2026-08-24T14:00"));
+  const message = parsed.searchParams.get("text") ?? "";
+  assert.equal(message, "Hi, I completed the Wellness Wear Finder assessment and would like to request a private fitting.\n\nPreferred date and time: 24 Aug 2026 at 2:00 PM\n\nPlease let me know if this time is available.");
   assert.equal(parsed.pathname, "/6580208895");
+  assert.doesNotMatch(message, /Sarah|81234567|Comfort need:|Routine:|Budget:|Suggested option:/i);
 });

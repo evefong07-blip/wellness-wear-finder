@@ -13,15 +13,17 @@ export function buildWhatsAppUrl(
   category: ProductCategory,
 ): string {
   const message = [
-    `Hi, I'm ${assessment.customerName}. I just completed the Wellness Wear Finder assessment.`,
-    `My WhatsApp number: ${normalizeSingaporeNumber(assessment.whatsappNumber)}.`,
-    `My main concern: ${assessment.comfortConcern}.`,
-    `When it affects me: ${assessment.whenAffected}.`,
-    `Budget: ${assessment.budgetRange}.`,
-    `Suggestion: ${category.name}.`,
-    `Estimated catalogue price: ${formatPriceAmount(category)}.`,
-    "Requested next step: WhatsApp follow-up.",
-    "I'd like to learn more.",
+    "Hi, I completed the Wellness Wear Finder assessment and would like to learn more about my result.",
+    "",
+    "My answers:",
+    `Comfort need: ${assessment.comfortConcern}`,
+    `Routine: ${assessment.whenAffected}`,
+    `Budget: ${assessment.budgetRange}`,
+    "",
+    `Suggested option: ${category.name}`,
+    `Estimated catalogue price: ${formatPriceAmount(category)}`,
+    "",
+    "Could you tell me more about this option?",
   ].join("\n");
 
   return `https://wa.me/${normalizeSingaporeNumber(DISTRIBUTOR_WHATSAPP_NUMBER)}?text=${encodeURIComponent(message)}`;
@@ -29,21 +31,37 @@ export function buildWhatsAppUrl(
 
 export function buildUndecidedWhatsAppUrl(assessment: AssessmentInput): string {
   const message = [
-    `Hi, I'm ${assessment.customerName}. I completed the Wellness Wear Finder assessment.`,
-    `My WhatsApp number: ${normalizeSingaporeNumber(assessment.whatsappNumber)}.`,
-    `Main comfort need: ${assessment.comfortConcern}.`,
-    `Routine or timing: ${assessment.whenAffected}.`,
-    `Budget: ${assessment.budgetRange}.`,
-    "I'm still unsure which product category fits me and would like help narrowing down the most suitable starting point.",
+    "Hi, I completed the Wellness Wear Finder assessment, but I’m still unsure which option suits me.",
+    "",
+    "My answers:",
+    `Comfort need: ${assessment.comfortConcern}`,
+    `Routine: ${assessment.whenAffected}`,
+    `Budget: ${assessment.budgetRange}`,
+    "",
+    "Could you help me find a suitable starting point?",
   ].join("\n");
 
   return `https://wa.me/${normalizeSingaporeNumber(DISTRIBUTOR_WHATSAPP_NUMBER)}?text=${encodeURIComponent(message)}`;
 }
 
-export function addFittingRequestToWhatsAppUrl(url: string, preferredTime: string): string {
-  const parsed = new URL(url);
-  const message = parsed.searchParams.get("text") ?? "";
-  const fittingLine = `Private fitting requested: ${preferredTime.replace("T", " at ")}.`;
-  parsed.searchParams.set("text", `${message}\n${fittingLine}`);
-  return parsed.toString();
+function formatFittingDateTime(preferredTime: string): string {
+  const [date, time] = preferredTime.split("T");
+  const [year, month, day] = date.split("-").map(Number);
+  const [hours, minutes] = time.split(":").map(Number);
+  const monthName = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][month - 1];
+  const hour = hours % 12 || 12;
+  const period = hours >= 12 ? "PM" : "AM";
+  return `${day} ${monthName} ${year} at ${hour}:${String(minutes).padStart(2, "0")} ${period}`;
+}
+
+export function buildFittingWhatsAppUrl(preferredTime: string): string {
+  const message = [
+    "Hi, I completed the Wellness Wear Finder assessment and would like to request a private fitting.",
+    "",
+    `Preferred date and time: ${formatFittingDateTime(preferredTime)}`,
+    "",
+    "Please let me know if this time is available.",
+  ].join("\n");
+
+  return `https://wa.me/${normalizeSingaporeNumber(DISTRIBUTOR_WHATSAPP_NUMBER)}?text=${encodeURIComponent(message)}`;
 }

@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { buildAssessmentRecord, type AssessmentSubmission } from "../lib/logic/submission.ts";
-import { addFittingRequestToWhatsAppUrl, buildUndecidedWhatsAppUrl } from "../lib/logic/whatsapp.ts";
+import { buildFittingWhatsAppUrl, buildUndecidedWhatsAppUrl } from "../lib/logic/whatsapp.ts";
 import { isFullyUndecidedAssessment, undecidedPresentation, undecidedStructuredAssessment } from "../lib/logic/undecided.ts";
 import type { AssessmentInput } from "../lib/types.ts";
 
@@ -37,15 +37,19 @@ test("shows the neutral consultation result without product or false match claim
 
 test("builds both contact actions for the distributor, never the visitor", () => {
   const whatsappUrl = new URL(buildUndecidedWhatsAppUrl(input));
+  const helpMessage = whatsappUrl.searchParams.get("text") ?? "";
   assert.equal(whatsappUrl.hostname, "wa.me");
   assert.equal(whatsappUrl.pathname, "/6580208895");
-  assert.match(whatsappUrl.searchParams.get("text") ?? "", /completed the Wellness Wear Finder assessment/i);
-  assert.match(whatsappUrl.searchParams.get("text") ?? "", /still unsure which product category fits/i);
-  assert.doesNotMatch(whatsappUrl.pathname, /6581234567/);
+  assert.equal(helpMessage, "Hi, I completed the Wellness Wear Finder assessment, but I’m still unsure which option suits me.\n\nMy answers:\nComfort need: Not sure yet\nRoutine: It varies\nBudget: Flexible / not sure\n\nCould you help me find a suitable starting point?");
+  assert.doesNotMatch(helpMessage, /81234567|6581234567|private fitting/i);
+  assert.doesNotMatch(helpMessage, /learn more\.Hi/i);
 
-  const fittingUrl = new URL(addFittingRequestToWhatsAppUrl(whatsappUrl.toString(), "2026-08-24T15:00:00+08:00"));
+  const fittingUrl = new URL(buildFittingWhatsAppUrl("2026-08-24T15:00"));
+  const fittingMessage = fittingUrl.searchParams.get("text") ?? "";
   assert.equal(fittingUrl.pathname, "/6580208895");
-  assert.match(fittingUrl.searchParams.get("text") ?? "", /Private fitting requested: 2026-08-24 at 15:00:00\+08:00/);
+  assert.equal(fittingMessage, "Hi, I completed the Wellness Wear Finder assessment and would like to request a private fitting.\n\nPreferred date and time: 24 Aug 2026 at 3:00 PM\n\nPlease let me know if this time is available.");
+  assert.doesNotMatch(fittingMessage, /81234567|6581234567|Comfort need:|Routine:|Budget:/i);
+  assert.notEqual(fittingMessage, helpMessage);
 });
 
 test("persists the undecided assessment without a suggested product", () => {

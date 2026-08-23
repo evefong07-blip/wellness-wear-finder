@@ -38,6 +38,8 @@ export async function processAssessment(input: AssessmentInput): Promise<Assessm
 
     return {
       assessmentId,
+      customerName: normalizedInput.customerName.trim(),
+      whatsappNumber: normalizedInput.whatsappNumber,
       outcome: "consultation",
       category: null,
       confidence: 0,
@@ -79,6 +81,8 @@ export async function processAssessment(input: AssessmentInput): Promise<Assessm
 
   return {
     assessmentId,
+    customerName: normalizedInput.customerName.trim(),
+    whatsappNumber: normalizedInput.whatsappNumber,
     outcome: "product",
     category: suggestedCategory,
     confidence,

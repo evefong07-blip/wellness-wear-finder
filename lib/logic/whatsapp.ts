@@ -54,10 +54,13 @@ function formatFittingDateTime(preferredTime: string): string {
   return `${day} ${monthName} ${year} at ${hour}:${String(minutes).padStart(2, "0")} ${period}`;
 }
 
-export function buildFittingWhatsAppUrl(preferredTime: string): string {
+export function buildFittingWhatsAppUrl(customerName: string, whatsappNumber: string, preferredTime: string): string {
+  const localNumber = normalizeSingaporeNumber(whatsappNumber).replace(/^65/, "");
   const message = [
     "Hi, I completed the Wellness Wear Finder assessment and would like to request a private fitting.",
     "",
+    `Name: ${customerName.trim()}`,
+    `WhatsApp: +65 ${localNumber}`,
     `Preferred date and time: ${formatFittingDateTime(preferredTime)}`,
     "",
     "Please let me know if this time is available.",

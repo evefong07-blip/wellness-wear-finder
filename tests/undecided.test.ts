@@ -44,11 +44,11 @@ test("builds both contact actions for the distributor, never the visitor", () =>
   assert.doesNotMatch(helpMessage, /81234567|6581234567|private fitting/i);
   assert.doesNotMatch(helpMessage, /learn more\.Hi/i);
 
-  const fittingUrl = new URL(buildFittingWhatsAppUrl("2026-08-24T15:00"));
+  const fittingUrl = new URL(buildFittingWhatsAppUrl("Codex Undecided QA", "81234567", "2026-08-24T15:00"));
   const fittingMessage = fittingUrl.searchParams.get("text") ?? "";
   assert.equal(fittingUrl.pathname, "/6580208895");
-  assert.equal(fittingMessage, "Hi, I completed the Wellness Wear Finder assessment and would like to request a private fitting.\n\nPreferred date and time: 24 Aug 2026 at 3:00 PM\n\nPlease let me know if this time is available.");
-  assert.doesNotMatch(fittingMessage, /81234567|6581234567|Comfort need:|Routine:|Budget:/i);
+  assert.equal(fittingMessage, "Hi, I completed the Wellness Wear Finder assessment and would like to request a private fitting.\n\nName: Codex Undecided QA\nWhatsApp: +65 81234567\nPreferred date and time: 24 Aug 2026 at 3:00 PM\n\nPlease let me know if this time is available.");
+  assert.doesNotMatch(fittingMessage, /Comfort need:|Routine:|Budget:/i);
   assert.notEqual(fittingMessage, helpMessage);
 });
 

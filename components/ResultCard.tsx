@@ -22,20 +22,30 @@ export function ResultCard({ result, onRestart }: { result: AssessmentResult; on
   const [preferredDate, setPreferredDate] = useState("");
   const [preferredClock, setPreferredClock] = useState("");
   const [saved, setSaved] = useState(false);
+  const [showOpenFallback, setShowOpenFallback] = useState(false);
   const [error, setError] = useState("");
   const [isPending, startTransition] = useTransition();
   const preferredTime = combinePreferredDateTime(preferredDate, preferredClock);
   const budgetFit = result.category ? getBudgetFit(result.category, result.budgetRange) : "unknown";
-  const fittingWhatsAppUrl = saved ? buildFittingWhatsAppUrl(preferredTime) : null;
+  const fittingWhatsAppUrl = preferredTime ? buildFittingWhatsAppUrl(result.customerName, result.whatsappNumber, preferredTime) : "";
   const isConsultation = result.outcome === "consultation";
 
   function saveFitting() {
     setError("");
+    setShowOpenFallback(false);
+    const whatsappWindow = window.open("", "_blank");
+    if (whatsappWindow) whatsappWindow.opener = null;
     startTransition(async () => {
       try {
         await submitFittingRequest(result.assessmentId, preferredTime);
         setSaved(true);
+        if (whatsappWindow) {
+          whatsappWindow.location.href = fittingWhatsAppUrl;
+        } else {
+          setShowOpenFallback(true);
+        }
       } catch (reason) {
+        whatsappWindow?.close();
         setError(reason instanceof Error ? reason.message : "Could not save your request.");
       }
     });
@@ -66,7 +76,7 @@ export function ResultCard({ result, onRestart }: { result: AssessmentResult; on
         {error && <div className="error-banner" role="alert">{error}</div>}
         <button type="button" className="button primary" onClick={saveFitting} disabled={!preferredTime || isPending}>{isPending ? "Saving…" : "Save fitting request"}</button>
       </div>}
-      {saved && <><div className="success-banner" role="status"><strong>Fitting request saved.</strong><span>Your separate WhatsApp request is ready for you to review.</span></div><a className="button fitting" href={fittingWhatsAppUrl ?? undefined} target="_blank" rel="noreferrer">Request a private fitting <span>↗</span></a></>}
+      {saved && <><div className="success-banner" role="status"><strong>Fitting request saved.</strong><span>{showOpenFallback ? "Use the button below to open your prepared WhatsApp request." : "Your prepared WhatsApp request has opened for you to review."}</span></div>{showOpenFallback && <a className="button fitting" href={fittingWhatsAppUrl} target="_blank" rel="noreferrer">Open fitting request in WhatsApp <span>↗</span></a>}</>}
       <p className="result-footnote">Your assessment has been saved. The message opens in your WhatsApp for you to review before sending.</p>
       <button className="text-button" type="button" onClick={onRestart}>Start another assessment</button>
     </section>

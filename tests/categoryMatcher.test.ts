@@ -98,9 +98,10 @@ test("routes a natural product-result message to the distributor without the vis
 });
 
 test("builds a separate fitting-only message after a time is selected", () => {
-  const parsed = new URL(buildFittingWhatsAppUrl("2026-08-24T14:00"));
+  const parsed = new URL(buildFittingWhatsAppUrl("Sarah Tan", "81234567", "2026-08-24T14:00"));
   const message = parsed.searchParams.get("text") ?? "";
-  assert.equal(message, "Hi, I completed the Wellness Wear Finder assessment and would like to request a private fitting.\n\nPreferred date and time: 24 Aug 2026 at 2:00 PM\n\nPlease let me know if this time is available.");
+  assert.equal(message, "Hi, I completed the Wellness Wear Finder assessment and would like to request a private fitting.\n\nName: Sarah Tan\nWhatsApp: +65 81234567\nPreferred date and time: 24 Aug 2026 at 2:00 PM\n\nPlease let me know if this time is available.");
   assert.equal(parsed.pathname, "/6580208895");
-  assert.doesNotMatch(message, /Sarah|81234567|Comfort need:|Routine:|Budget:|Suggested option:/i);
+  assert.doesNotMatch(message, /Comfort need:|Routine:|Budget:|Suggested option:/i);
+  assert.match(new URL(buildFittingWhatsAppUrl("Sarah Tan", "+65 8123 4567", "2026-08-24T14:00")).searchParams.get("text") ?? "", /WhatsApp: \+65 81234567/);
 });

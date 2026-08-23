@@ -1,4 +1,7 @@
 import type { ProductCategory } from "@/lib/types";
+import { getBudgetFit } from "./budget.ts";
+
+export { parseBudget } from "./budget.ts";
 
 export type CategoryMatch = {
   category: ProductCategory;
@@ -6,17 +9,6 @@ export type CategoryMatch = {
   confidence: number;
   reviewStatus: "unreviewed" | "needs-review";
 };
-
-export function parseBudget(range: string): [number, number] {
-  const values = range.match(/\d+/g)?.map(Number) ?? [];
-  if (!values.length) return [0, Number.POSITIVE_INFINITY];
-  if (values.length === 1) {
-    if (/under|below|up to/i.test(range)) return [0, values[0]];
-    if (/\+|above|over|from/i.test(range)) return [values[0], Number.POSITIVE_INFINITY];
-    return [values[0], values[0]];
-  }
-  return [Math.min(values[0], values[1]), Math.max(values[0], values[1])];
-}
 
 export function matchCategory(
   categories: ProductCategory[],
@@ -26,20 +18,20 @@ export function matchCategory(
 
   const concern = answers.concern.toLowerCase();
   const timing = answers.timing.toLowerCase();
-  const [budgetMin, budgetMax] = parseBudget(answers.budget);
+  const hasBudgetMatch = categories.some((category) => getBudgetFit(category, answers.budget) === "overlaps");
   const ranked = categories
     .map((category) => {
       const keywords = category.match_keywords ?? [];
       const concernMatch = keywords.some((keyword) => concern.includes(keyword.toLowerCase()));
       const timingMatch = keywords.some((keyword) => timing.includes(keyword.toLowerCase()));
-      const categoryMin = category.budget_min ?? 0;
-      const categoryMax = category.budget_max ?? Number.POSITIVE_INFINITY;
-      const budgetMatches = budgetMax >= categoryMin && budgetMin <= categoryMax;
+      const budgetFit = getBudgetFit(category, answers.budget);
+      const budgetScore = budgetFit === "overlaps" || budgetFit === "flexible" ? 2 : 0;
+      const preferenceScore = answers.preferredCategoryId === category.id && (budgetFit !== "outside" || !hasBudgetMatch) ? 2 : 0;
       const score =
         (concernMatch ? 3 : 0) +
         (timingMatch ? 1 : 0) +
-        (budgetMatches ? 2 : 0) +
-        (answers.preferredCategoryId === category.id ? 2 : 0);
+        budgetScore +
+        preferenceScore;
       return { category, score };
     })
     .sort((a, b) => b.score - a.score || a.category.name.localeCompare(b.category.name));

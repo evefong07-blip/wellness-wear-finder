@@ -25,9 +25,10 @@ export async function processAssessment(input: AssessmentInput): Promise<Assessm
     preferredCategoryId: input.preferredCategoryId,
   });
   const aiSuggestion = await getAiSuggestion(input, categories);
-  const suggestedCategory = aiSuggestion ? categories.find((category) => category.id === aiSuggestion.suggestedCategoryId) ?? match.category : match.category;
-  const confidence = aiSuggestion?.confidence ?? match.confidence;
-  const structured = aiSuggestion ?? structureAssessment(input, suggestedCategory);
+  const approvedAiSuggestion = aiSuggestion?.suggestedCategoryId === match.category.id ? aiSuggestion : null;
+  const suggestedCategory = match.category;
+  const confidence = approvedAiSuggestion?.confidence ?? match.confidence;
+  const structured = approvedAiSuggestion ?? structureAssessment(input, suggestedCategory);
   const lead = scoreLead(input, confidence);
   const normalizedInput = { ...input, whatsappNumber: singaporeNumber };
   const assessmentId = await createAssessment({
@@ -35,13 +36,13 @@ export async function processAssessment(input: AssessmentInput): Promise<Assessm
     suggestedCategory,
     suggestionConfidence: confidence,
     reviewStatus: confidence < 0.5 ? "needs-review" : match.reviewStatus,
-    suggestionSource: aiSuggestion ? "ai" : "rule",
+    suggestionSource: approvedAiSuggestion ? "ai" : "rule",
     ...structured,
     leadScore: lead.score,
     leadScoreReasons: lead.reasons,
   });
   await Promise.allSettled([
-    trackEvent("assessment_completed", assessmentId, { source: aiSuggestion ? "ai" : "rule" }),
+    trackEvent("assessment_completed", assessmentId, { source: approvedAiSuggestion ? "ai" : "rule" }),
     trackEvent("suggestion_shown", assessmentId, { categoryId: suggestedCategory.id }),
   ]);
 
@@ -52,6 +53,7 @@ export async function processAssessment(input: AssessmentInput): Promise<Assessm
     reviewStatus: confidence < 0.5 ? "needs-review" : match.reviewStatus,
     whatsappUrl: buildWhatsAppUrl(normalizedInput, suggestedCategory),
     recommendationCopy: structured.recommendationCopy,
-    suggestionSource: aiSuggestion ? "ai" : "rule",
+    suggestionSource: approvedAiSuggestion ? "ai" : "rule",
+    budgetRange: input.budgetRange,
   };
 }

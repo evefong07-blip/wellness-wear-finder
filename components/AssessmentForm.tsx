@@ -7,6 +7,7 @@ import type { AssessmentInput, AssessmentResult, ProductCategory } from "@/lib/t
 import { ResultCard } from "@/components/ResultCard";
 import { matchCategory } from "@/lib/logic/categoryMatcher";
 import { isValidSingaporeMobile } from "@/lib/logic/form";
+import { describeBudgetFit, formatEstimatedPrice, getBudgetFit } from "@/lib/logic/budget";
 
 const concerns = [
   "Knee comfort during walking, standing or stairs",
@@ -15,11 +16,11 @@ const concerns = [
   "Not sure yet",
 ];
 const timings = ["During walking or stairs", "After long hours standing", "After a long day", "At bedtime or while resting", "It varies"];
-const budgets = ["S$65-S$70", "S$70-S$115", "About S$165", "I’m flexible / not sure"];
+const budgets = ["Under S$80", "S$80–S$120", "S$120–S$180", "S$180–S$230", "Flexible / not sure"];
 const categoryImages: Record<string, string> = {
-  "Knee Supporter": "/images/category-knee-comfort.webp",
-  "Wellness Socks": "/images/category-wellness-socks.webp",
-  "Wellness Eye Mask": "/images/category-eye-rest.webp",
+  "Knee Supporter": "/images/product-knee-supporter.png",
+  "Wellness Socks": "/images/product-wellness-socks.png",
+  "Wellness Eye Mask": "/images/product-eye-mask.png",
 };
 
 const initialValues: AssessmentInput = {
@@ -94,7 +95,7 @@ export function AssessmentForm({ categories }: { categories: ProductCategory[] }
       <div className="progress-track"><span style={{ width: `${(step + 1) * 20}%` }} /></div>
 
       {step === 0 && (
-        <ChoiceQuestion eyebrow="Your everyday comfort" title="What would you most like everyday comfort with?" copy="Start with what you notice most — there’s no right or wrong answer." options={concerns} value={values.comfortConcern} onChange={(value) => choose("comfortConcern", value)} />
+        <ChoiceQuestion eyebrow="Your everyday comfort" title="Which area would you like more everyday comfort with?" copy="Start with what you notice most — there’s no right or wrong answer." options={concerns} value={values.comfortConcern} onChange={(value) => choose("comfortConcern", value)} />
       )}
 
       {step === 1 && <ChoiceQuestion eyebrow="Your routine" title="When do you notice it most?" copy="This helps us narrow the category to your everyday context." options={timings} value={values.whenAffected} onChange={(value) => choose("whenAffected", value)} />}
@@ -105,7 +106,7 @@ export function AssessmentForm({ categories }: { categories: ProductCategory[] }
           <p className="question-copy">Choose by lifestyle and comfort — these are categories, not items to buy here.</p>
           <div className="category-choice-grid">
             {categories.map((category) => <button type="button" key={category.id} className={values.preferredCategoryId === category.id ? "category-choice selected" : "category-choice"} onClick={() => chooseCategory(category.id)}>
-              <Image src={categoryImages[category.name] ?? "/images/category-knee-comfort.webp"} alt={categoryImageAlt(category.name)} width={640} height={640} sizes="(max-width: 560px) 42vw, 180px" />
+              <Image src={categoryImages[category.name] ?? "/images/product-knee-supporter.png"} alt={categoryImageAlt(category.name)} width={640} height={640} sizes="(max-width: 560px) 42vw, 180px" />
               <span><strong>{category.name}</strong><small>{category.description}</small></span>
             </button>)}
             <button type="button" className={categoryChoiceMade && values.preferredCategoryId === null ? "choice category-unsure selected" : "choice category-unsure"} onClick={() => chooseCategory(null)}><span className="radio-dot" /><strong>Help me choose</strong><span>Use my answers to find the closest match</span></button>
@@ -118,9 +119,10 @@ export function AssessmentForm({ categories }: { categories: ProductCategory[] }
           <p className="eyebrow">Your match is taking shape</p>
           <h2 id="assessment-title">Here’s your likely starting point.</h2>
           <div className="match-teaser">
-            <Image src={categoryImages[previewMatch.name] ?? "/images/category-knee-comfort.webp"} alt="" width={120} height={120} />
-            <div><span>Your likely match</span><strong>{previewMatch.name}</strong><small>{formatPrice(previewMatch)}</small></div>
+            <Image src={categoryImages[previewMatch.name] ?? "/images/product-knee-supporter.png"} alt="" width={120} height={120} />
+            <div><span>Your likely match</span><strong>{previewMatch.name}</strong><small>{formatEstimatedPrice(previewMatch)}</small></div>
           </div>
+          <p className={`budget-guidance ${getBudgetFit(previewMatch, values.budgetRange) === "outside" ? "outside" : ""}`}>{describeBudgetFit(previewMatch, values.budgetRange)}</p>
           <p className="question-copy">Add your details to save the full recommendation and choose WhatsApp or a private fitting next.</p>
           <label>Your name<input autoFocus value={values.customerName} onChange={(event) => choose("customerName", event.target.value)} placeholder="Sarah Tan" autoComplete="name" /></label>
           <label>Singapore WhatsApp number
@@ -148,14 +150,8 @@ function ChoiceQuestion({ eyebrow, title, copy, options, value, onChange }: { ey
   return <div className="question-panel"><p className="eyebrow">{eyebrow}</p><h2>{title}</h2><p className="question-copy">{copy}</p><div className="choice-grid">{options.map((option) => <button type="button" key={option} className={value === option ? "choice selected" : "choice"} onClick={() => onChange(option)}><span className="radio-dot" /> <strong>{option}</strong></button>)}</div></div>;
 }
 
-function formatPrice(category: ProductCategory) {
-  if (category.budget_min === null) return "Price confirmed during your private chat";
-  if (category.budget_max === null || category.budget_max === category.budget_min) return `Typical catalogue price: S$${category.budget_min}`;
-  return `Typical catalogue range: S$${category.budget_min}–S$${category.budget_max}`;
-}
-
 function categoryImageAlt(name: string) {
-  if (name === "Knee Supporter") return "Relaxed everyday knee comfort lifestyle";
-  if (name === "Wellness Socks") return "Everyday foot and lower-leg comfort lifestyle";
-  return "Quiet eye rest and winding-down lifestyle";
+  if (name === "Knee Supporter") return "Black knee supporter worn on the lower leg";
+  if (name === "Wellness Socks") return "Black wellness socks worn by a seated model";
+  return "Beige wellness eye mask";
 }

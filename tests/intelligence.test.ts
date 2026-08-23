@@ -4,14 +4,14 @@ import { scoreLead, structureAssessment } from "../lib/logic/intelligence.ts";
 import { buildDashboardStats } from "../lib/logic/dashboard.ts";
 import type { AssessmentInput, AssessmentRow, ProductCategory } from "../lib/types.ts";
 
-const input: AssessmentInput = { customerName: "Sarah", whatsappNumber: "81234567", comfortConcern: "Knee comfort during walking", whenAffected: "During walking or stairs", budgetRange: "About S$165", preferredCategoryId: "knee" };
+const input: AssessmentInput = { customerName: "Sarah", whatsappNumber: "81234567", comfortConcern: "Knee comfort during walking", whenAffected: "During walking or stairs", budgetRange: "S$120–S$180", preferredCategoryId: "knee" };
 const category: ProductCategory = { id: "knee", name: "Knee Supporter", description: "Support", match_keywords: ["knee"], budget_min: 165, budget_max: 165 };
 
 test("structures messy assessment answers without AI", () => {
   const result = structureAssessment(input, category);
   assert.equal(result.parsedConcern, "knee_comfort");
   assert.equal(result.parsedTiming, "during_movement");
-  assert.deepEqual([result.parsedBudgetMin, result.parsedBudgetMax], [165, 165]);
+  assert.deepEqual([result.parsedBudgetMin, result.parsedBudgetMax], [120, 180]);
   assert.match(result.recommendationCopy, /Knee Supporter/);
 });
 

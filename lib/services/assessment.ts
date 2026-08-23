@@ -55,5 +55,6 @@ export async function processAssessment(input: AssessmentInput): Promise<Assessm
     recommendationCopy: structured.recommendationCopy,
     suggestionSource: approvedAiSuggestion ? "ai" : "rule",
     budgetRange: input.budgetRange,
+    preferredCategoryId: input.preferredCategoryId,
   };
 }

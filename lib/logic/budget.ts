@@ -26,10 +26,21 @@ export function formatEstimatedPrice(category: ProductCategory): string {
   return `Estimated price range: S$${category.budget_min}–S$${category.budget_max}`;
 }
 
-export function describeBudgetFit(category: ProductCategory, range: string): string {
+export function formatPriceAmount(category: ProductCategory): string {
+  if (category.budget_min === null) return "a price confirmed with Evelyn";
+  if (category.budget_max === null || category.budget_max === category.budget_min) return `S$${category.budget_min}`;
+  return `S$${category.budget_min}–S$${category.budget_max}`;
+}
+
+export function describeBudgetFit(category: ProductCategory, range: string, deliberatelySelected = false): string {
   const fit = getBudgetFit(category, range);
   if (fit === "flexible") return "You selected a flexible budget, so your comfort needs and routine guided this match.";
   if (fit === "overlaps") return `The estimated price overlaps your selected range (${range}).`;
-  if (fit === "outside") return `The estimated price is outside your selected range (${range}). Your comfort needs were the stronger match, so check the price with the distributor before deciding.`;
+  if (fit === "outside" && deliberatelySelected) {
+    const [budgetMin, budgetMax] = parseBudget(range);
+    const direction = category.budget_min !== null && category.budget_min > budgetMax ? "above" : category.budget_max !== null && category.budget_max < budgetMin ? "below" : "outside";
+    return `Your selected product is typically ${formatPriceAmount(category)}, which is ${direction} your preferred budget. Evelyn can discuss alternatives or help you decide whether it is suitable.`;
+  }
+  if (fit === "outside") return `The estimated price is outside your selected range (${range}). Evelyn can discuss alternatives or help you decide whether this match is suitable.`;
   return "Ask the distributor to confirm the price before deciding.";
 }

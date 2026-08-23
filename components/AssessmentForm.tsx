@@ -122,7 +122,7 @@ export function AssessmentForm({ categories }: { categories: ProductCategory[] }
             <Image src={categoryImages[previewMatch.name] ?? "/images/product-knee-supporter.png"} alt="" width={120} height={120} />
             <div><span>Your likely match</span><strong>{previewMatch.name}</strong><small>{formatEstimatedPrice(previewMatch)}</small></div>
           </div>
-          <p className={`budget-guidance ${getBudgetFit(previewMatch, values.budgetRange) === "outside" ? "outside" : ""}`}>{describeBudgetFit(previewMatch, values.budgetRange)}</p>
+          <p className={`budget-guidance ${getBudgetFit(previewMatch, values.budgetRange) === "outside" ? "outside" : ""}`}>{describeBudgetFit(previewMatch, values.budgetRange, previewMatch.id === values.preferredCategoryId)}</p>
           <p className="question-copy">Add your details to save the full recommendation and choose WhatsApp or a private fitting next.</p>
           <label>Your name<input autoFocus value={values.customerName} onChange={(event) => choose("customerName", event.target.value)} placeholder="Sarah Tan" autoComplete="name" /></label>
           <label>Singapore WhatsApp number

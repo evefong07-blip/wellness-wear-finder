@@ -18,7 +18,6 @@ export function matchCategory(
 
   const concern = answers.concern.toLowerCase();
   const timing = answers.timing.toLowerCase();
-  const hasBudgetMatch = categories.some((category) => getBudgetFit(category, answers.budget) === "overlaps");
   const ranked = categories
     .map((category) => {
       const keywords = category.match_keywords ?? [];
@@ -26,7 +25,7 @@ export function matchCategory(
       const timingMatch = keywords.some((keyword) => timing.includes(keyword.toLowerCase()));
       const budgetFit = getBudgetFit(category, answers.budget);
       const budgetScore = budgetFit === "overlaps" || budgetFit === "flexible" ? 2 : 0;
-      const preferenceScore = answers.preferredCategoryId === category.id && (budgetFit !== "outside" || !hasBudgetMatch) ? 2 : 0;
+      const preferenceScore = answers.preferredCategoryId === category.id ? 2 : 0;
       const score =
         (concernMatch ? 3 : 0) +
         (timingMatch ? 1 : 0) +

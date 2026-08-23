@@ -43,7 +43,7 @@ export function ResultCard({ result, onRestart }: { result: AssessmentResult; on
       <p className="eyebrow">Your everyday comfort match</p>
       <h2>{result.category.name}</h2>
       <p className="result-description">{result.recommendationCopy || result.category.description}</p>
-      <div className={`price-summary ${budgetFit === "outside" ? "outside" : ""}`}><strong>{formatEstimatedPrice(result.category)}</strong><p>{describeBudgetFit(result.category, result.budgetRange)}</p></div>
+      <div className={`price-summary ${budgetFit === "outside" ? "outside" : ""}`}><strong>{formatEstimatedPrice(result.category)}</strong><p>{describeBudgetFit(result.category, result.budgetRange, result.category.id === result.preferredCategoryId)}</p></div>
       <div className="match-note"><span>Why this match</span><p>Your comfort need and routine aligned most closely with this category. This is practical guidance, not medical advice.</p></div>
       <a className="button whatsapp" href={result.whatsappUrl} target="_blank" rel="noreferrer" onClick={() => { void fetch("/api/events", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ eventType: "whatsapp_clicked", assessmentId: result.assessmentId }), keepalive: true }); }}>Continue on WhatsApp <span>↗</span></a>
       {!saved && <button className="button fitting" type="button" onClick={() => setShowFitting((value) => !value)}>Request a private fitting</button>}

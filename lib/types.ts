@@ -25,6 +25,7 @@ export type AssessmentResult = {
   recommendationCopy: string;
   suggestionSource: "rule" | "ai";
   budgetRange: string;
+  preferredCategoryId: string | null;
 };
 
 export type AssessmentRow = {

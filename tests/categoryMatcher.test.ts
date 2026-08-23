@@ -56,9 +56,9 @@ test("matches the concrete products to their catalogue price ranges", () => {
   assert.equal(eyes.category.name, "Wellness Eye Mask");
 });
 
-test("an out-of-budget preference does not override an available budget match", () => {
+test("a deliberate product choice remains a recommendation signal despite a mismatch", () => {
   const result = matchCategory(categories, { concern: "Not sure yet", timing: "It varies", budget: "Under S$80", preferredCategoryId: "knee" });
-  assert.notEqual(result.category.name, "Knee Supporter");
+  assert.equal(result.category.name, "Knee Supporter");
 });
 
 test("shows estimated prices and explicitly explains an outside budget", () => {
@@ -66,4 +66,10 @@ test("shows estimated prices and explicitly explains an outside budget", () => {
   assert.equal(formatEstimatedPrice(categories[1]), "Estimated price range: S$70–S$115");
   assert.match(describeBudgetFit(categories[2], "S$180–S$230"), /outside your selected range/);
   assert.doesNotMatch(describeBudgetFit(categories[2], "S$180–S$230"), /aligned/i);
+});
+
+test("explains an explicitly selected product above budget without claiming alignment", () => {
+  const message = describeBudgetFit(categories[0], "Under S$80", true);
+  assert.equal(message, "Your selected product is typically S$165, which is above your preferred budget. Evelyn can discuss alternatives or help you decide whether it is suitable.");
+  assert.doesNotMatch(message, /aligned/i);
 });

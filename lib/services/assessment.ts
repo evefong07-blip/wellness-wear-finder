@@ -1,11 +1,12 @@
 import { createAssessment } from "@/lib/data/assessments";
 import { getCategories } from "@/lib/data/categories";
 import { matchCategory } from "@/lib/logic/categoryMatcher";
-import { buildWhatsAppUrl } from "@/lib/logic/whatsapp";
+import { buildUndecidedWhatsAppUrl, buildWhatsAppUrl } from "@/lib/logic/whatsapp";
 import { getAiSuggestion } from "@/lib/ai/suggestion";
 import { scoreLead, structureAssessment } from "@/lib/logic/intelligence";
 import { trackEvent } from "@/lib/data/events";
 import type { AssessmentInput, AssessmentResult } from "@/lib/types";
+import { isFullyUndecidedAssessment, undecidedStructuredAssessment } from "@/lib/logic/undecided";
 
 export async function processAssessment(input: AssessmentInput): Promise<AssessmentResult> {
   const singaporeNumber = input.whatsappNumber.replace(/\D/g, "").replace(/^65/, "");
@@ -18,6 +19,37 @@ export async function processAssessment(input: AssessmentInput): Promise<Assessm
   }
 
   const categories = await getCategories();
+  const normalizedInput = { ...input, whatsappNumber: singaporeNumber };
+
+  if (isFullyUndecidedAssessment(input)) {
+    const structured = undecidedStructuredAssessment();
+    const lead = scoreLead(input, 0);
+    const assessmentId = await createAssessment({
+      ...normalizedInput,
+      suggestedCategory: null,
+      suggestionConfidence: 0,
+      reviewStatus: "needs-review",
+      suggestionSource: "rule",
+      ...structured,
+      leadScore: lead.score,
+      leadScoreReasons: [...lead.reasons, "Needs personal guidance"],
+    });
+    await trackEvent("assessment_completed", assessmentId, { source: "consultation" }).catch(() => undefined);
+
+    return {
+      assessmentId,
+      outcome: "consultation",
+      category: null,
+      confidence: 0,
+      reviewStatus: "needs-review",
+      whatsappUrl: buildUndecidedWhatsAppUrl(normalizedInput),
+      recommendationCopy: structured.recommendationCopy,
+      suggestionSource: "rule",
+      budgetRange: input.budgetRange,
+      preferredCategoryId: null,
+    };
+  }
+
   const match = matchCategory(categories, {
     concern: input.comfortConcern,
     timing: input.whenAffected,
@@ -30,7 +62,6 @@ export async function processAssessment(input: AssessmentInput): Promise<Assessm
   const confidence = approvedAiSuggestion?.confidence ?? match.confidence;
   const structured = approvedAiSuggestion ?? structureAssessment(input, suggestedCategory);
   const lead = scoreLead(input, confidence);
-  const normalizedInput = { ...input, whatsappNumber: singaporeNumber };
   const assessmentId = await createAssessment({
     ...normalizedInput,
     suggestedCategory,
@@ -48,6 +79,7 @@ export async function processAssessment(input: AssessmentInput): Promise<Assessm
 
   return {
     assessmentId,
+    outcome: "product",
     category: suggestedCategory,
     confidence,
     reviewStatus: confidence < 0.5 ? "needs-review" : match.reviewStatus,

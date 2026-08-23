@@ -6,6 +6,7 @@ import type { AssessmentResult } from "@/lib/types";
 import { combinePreferredDateTime, singaporeDateValue } from "@/lib/logic/form";
 import { describeBudgetFit, formatEstimatedPrice, getBudgetFit } from "@/lib/logic/budget";
 import { addFittingRequestToWhatsAppUrl } from "@/lib/logic/whatsapp";
+import { undecidedPresentation } from "@/lib/logic/undecided";
 
 const fittingTimes = Array.from({ length: 25 }, (_, index) => {
   const totalMinutes = 9 * 60 + index * 30;
@@ -24,8 +25,9 @@ export function ResultCard({ result, onRestart }: { result: AssessmentResult; on
   const [error, setError] = useState("");
   const [isPending, startTransition] = useTransition();
   const preferredTime = combinePreferredDateTime(preferredDate, preferredClock);
-  const budgetFit = getBudgetFit(result.category, result.budgetRange);
+  const budgetFit = result.category ? getBudgetFit(result.category, result.budgetRange) : "unknown";
   const whatsappUrl = saved ? addFittingRequestToWhatsAppUrl(result.whatsappUrl, preferredTime) : result.whatsappUrl;
+  const isConsultation = result.outcome === "consultation";
 
   function saveFitting() {
     setError("");
@@ -41,14 +43,21 @@ export function ResultCard({ result, onRestart }: { result: AssessmentResult; on
 
   return (
     <section className="assessment-card result-card" aria-live="polite">
-      <div className="result-icon">✓</div>
-      <p className="eyebrow">Your everyday comfort match</p>
-      <h2>{result.category.name}</h2>
-      <p className="result-description">{result.recommendationCopy || result.category.description}</p>
-      <div className={`price-summary ${budgetFit === "outside" ? "outside" : ""}`}><strong>{formatEstimatedPrice(result.category)}</strong><p>{describeBudgetFit(result.category, result.budgetRange, result.category.id === result.preferredCategoryId)}</p></div>
-      <div className="match-note"><span>Why this match</span><p>Your comfort need and routine aligned most closely with this category. This is practical guidance, not medical advice.</p></div>
-      <a className="button whatsapp" href={whatsappUrl} target="_blank" rel="noreferrer" onClick={() => { void fetch("/api/events", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ eventType: "whatsapp_clicked", assessmentId: result.assessmentId }), keepalive: true }); }}>Continue on WhatsApp <span>↗</span></a>
-      {!saved && <button className="button fitting" type="button" onClick={() => setShowFitting((value) => !value)}>Request a private fitting</button>}
+      <div className="result-icon">{isConsultation ? "?" : "✓"}</div>
+      {isConsultation ? <>
+        <p className="eyebrow">Personal guidance</p>
+        <h2>{undecidedPresentation.title}</h2>
+        <p className="result-description">{undecidedPresentation.message}</p>
+        <p className="consultation-support">{undecidedPresentation.supportingText}</p>
+      </> : result.category && <>
+        <p className="eyebrow">Your everyday comfort match</p>
+        <h2>{result.category.name}</h2>
+        <p className="result-description">{result.recommendationCopy || result.category.description}</p>
+        <div className={`price-summary ${budgetFit === "outside" ? "outside" : ""}`}><strong>{formatEstimatedPrice(result.category)}</strong><p>{describeBudgetFit(result.category, result.budgetRange, result.category.id === result.preferredCategoryId)}</p></div>
+        <div className="match-note"><span>Why this match</span><p>Your comfort need and routine aligned most closely with this category. This is practical guidance, not medical advice.</p></div>
+      </>}
+      <a className="button whatsapp" href={whatsappUrl} target="_blank" rel="noreferrer" onClick={() => { void fetch("/api/events", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ eventType: "whatsapp_clicked", assessmentId: result.assessmentId }), keepalive: true }); }}>{isConsultation ? undecidedPresentation.primaryAction : "Continue on WhatsApp"} <span>↗</span></a>
+      {!saved && <button className="button fitting" type="button" onClick={() => setShowFitting((value) => !value)}>{isConsultation ? undecidedPresentation.secondaryAction : "Request a private fitting"}</button>}
       {showFitting && !saved && <div className="fitting-form">
         <div className="fitting-fields">
           <label>Preferred date<input aria-label="Preferred date" type="date" min={singaporeDateValue()} defaultValue={preferredDate} onInput={(event) => setPreferredDate(event.currentTarget.value)} /></label>

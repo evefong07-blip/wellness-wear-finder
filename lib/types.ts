@@ -18,7 +18,8 @@ export type AssessmentInput = {
 
 export type AssessmentResult = {
   assessmentId: string;
-  category: ProductCategory;
+  outcome: "product" | "consultation";
+  category: ProductCategory | null;
   confidence: number;
   reviewStatus: "unreviewed" | "needs-review";
   whatsappUrl: string;

@@ -8,6 +8,7 @@ import { ResultCard } from "@/components/ResultCard";
 import { matchCategory } from "@/lib/logic/categoryMatcher";
 import { isValidSingaporeMobile } from "@/lib/logic/form";
 import { describeBudgetFit, formatEstimatedPrice, getBudgetFit } from "@/lib/logic/budget";
+import { isFullyUndecidedAssessment, undecidedPresentation } from "@/lib/logic/undecided";
 
 const concerns = [
   "Knee comfort during walking, standing or stairs",
@@ -52,7 +53,8 @@ export function AssessmentForm({ categories }: { categories: ProductCategory[] }
     Boolean(values.customerName.trim() && isValidSingaporeMobile(values.whatsappNumber)),
   ][step];
 
-  const previewMatch = step === 4 && categories.length
+  const fullyUndecided = isFullyUndecidedAssessment(values);
+  const previewMatch = step === 4 && categories.length && !fullyUndecided
     ? matchCategory(categories, {
       concern: values.comfortConcern,
       timing: values.whenAffected,
@@ -114,15 +116,22 @@ export function AssessmentForm({ categories }: { categories: ProductCategory[] }
         </div>
       )}
       {step === 3 && <ChoiceQuestion eyebrow="Your budget" title="What range feels comfortable?" copy="This helps keep the suggestion realistic for you." options={budgets} value={values.budgetRange} onChange={(value) => choose("budgetRange", value)} />}
-      {step === 4 && previewMatch && (
+      {step === 4 && (fullyUndecided || previewMatch) && (
         <div className="question-panel contact-step">
-          <p className="eyebrow">Your match is taking shape</p>
-          <h2 id="assessment-title">Here’s your likely starting point.</h2>
-          <div className="match-teaser">
-            <Image src={categoryImages[previewMatch.name] ?? "/images/product-knee-supporter.png"} alt="" width={120} height={120} />
-            <div><span>Your likely match</span><strong>{previewMatch.name}</strong><small>{formatEstimatedPrice(previewMatch)}</small></div>
-          </div>
-          <p className={`budget-guidance ${getBudgetFit(previewMatch, values.budgetRange) === "outside" ? "outside" : ""}`}>{describeBudgetFit(previewMatch, values.budgetRange, previewMatch.id === values.preferredCategoryId)}</p>
+          {fullyUndecided ? <>
+            <p className="eyebrow">Personal guidance</p>
+            <h2 id="assessment-title">{undecidedPresentation.title}</h2>
+            <p className="question-copy">{undecidedPresentation.message}</p>
+            <p className="consultation-support">{undecidedPresentation.supportingText}</p>
+          </> : previewMatch && <>
+            <p className="eyebrow">Your match is taking shape</p>
+            <h2 id="assessment-title">Here’s your likely starting point.</h2>
+            <div className="match-teaser">
+              <Image src={categoryImages[previewMatch.name] ?? "/images/product-knee-supporter.png"} alt="" width={120} height={120} />
+              <div><span>Your likely match</span><strong>{previewMatch.name}</strong><small>{formatEstimatedPrice(previewMatch)}</small></div>
+            </div>
+            <p className={`budget-guidance ${getBudgetFit(previewMatch, values.budgetRange) === "outside" ? "outside" : ""}`}>{describeBudgetFit(previewMatch, values.budgetRange, previewMatch.id === values.preferredCategoryId)}</p>
+          </>}
           <p className="question-copy">Add your details to save the full recommendation and choose WhatsApp or a private fitting next.</p>
           <label>Your name<input autoFocus value={values.customerName} onChange={(event) => choose("customerName", event.target.value)} placeholder="Sarah Tan" autoComplete="name" /></label>
           <label>Singapore WhatsApp number

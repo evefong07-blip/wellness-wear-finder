@@ -71,6 +71,7 @@ input:focus { border-color:var(--green); box-shadow:0 0 0 3px rgba(40,92,77,.1);
 .result-card { text-align:center; align-items:center; justify-content:center; }
 .result-icon { width:56px; height:56px; border-radius:50%; background:var(--sage); color:var(--green); display:grid; place-items:center; font-size:25px; margin-bottom:22px; }
 .result-description { color:var(--muted); line-height:1.65; max-width:440px; }
+.consultation-support { max-width:440px; color:var(--green); font-size:13px; font-weight:700; line-height:1.6; margin:2px 0 24px; }
 .match-note { text-align:left; background:#f1f4ef; padding:18px 20px; border-radius:14px; margin:20px 0 26px; width:100%; }
 .match-note span { font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:.12em; color:var(--green); }
 .match-note p { color:var(--muted); font-size:13px; line-height:1.5; margin:7px 0 0; }

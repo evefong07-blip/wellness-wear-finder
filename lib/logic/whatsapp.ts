@@ -1,4 +1,4 @@
-import type { AssessmentInput, ProductCategory } from "@/lib/types";
+import type { AssessmentInput, ProductCategory } from "../types.ts";
 import { formatPriceAmount } from "./budget.ts";
 
 export const DISTRIBUTOR_WHATSAPP_NUMBER = "80208895";
@@ -22,6 +22,19 @@ export function buildWhatsAppUrl(
     `Estimated catalogue price: ${formatPriceAmount(category)}.`,
     "Requested next step: WhatsApp follow-up.",
     "I'd like to learn more.",
+  ].join("\n");
+
+  return `https://wa.me/${normalizeSingaporeNumber(DISTRIBUTOR_WHATSAPP_NUMBER)}?text=${encodeURIComponent(message)}`;
+}
+
+export function buildUndecidedWhatsAppUrl(assessment: AssessmentInput): string {
+  const message = [
+    `Hi, I'm ${assessment.customerName}. I completed the Wellness Wear Finder assessment.`,
+    `My WhatsApp number: ${normalizeSingaporeNumber(assessment.whatsappNumber)}.`,
+    `Main comfort need: ${assessment.comfortConcern}.`,
+    `Routine or timing: ${assessment.whenAffected}.`,
+    `Budget: ${assessment.budgetRange}.`,
+    "I'm still unsure which product category fits me and would like help narrowing down the most suitable starting point.",
   ].join("\n");
 
   return `https://wa.me/${normalizeSingaporeNumber(DISTRIBUTOR_WHATSAPP_NUMBER)}?text=${encodeURIComponent(message)}`;

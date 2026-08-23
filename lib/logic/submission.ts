@@ -1,7 +1,7 @@
 import type { AssessmentInput, ProductCategory } from "../types.ts";
 
 export type AssessmentSubmission = AssessmentInput & {
-  suggestedCategory: ProductCategory;
+  suggestedCategory: ProductCategory | null;
   suggestionConfidence: number;
   reviewStatus: "unreviewed" | "needs-review";
   suggestionSource: "rule" | "ai";
@@ -29,7 +29,7 @@ export function buildAssessmentRecord(input: AssessmentSubmission, assessmentId:
     when_affected: input.whenAffected,
     preferred_category_id: input.preferredCategoryId,
     budget_range: input.budgetRange,
-    suggested_category_id: input.suggestedCategory.id,
+    suggested_category_id: input.suggestedCategory?.id ?? null,
     suggestion_source: input.suggestionSource,
     suggestion_confidence: input.suggestionConfidence,
     review_status: input.reviewStatus,

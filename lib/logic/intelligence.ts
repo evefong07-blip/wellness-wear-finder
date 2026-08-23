@@ -30,7 +30,7 @@ export function structureAssessment(input: AssessmentInput, category: ProductCat
     parsedTiming,
     parsedBudgetMin: budgetMin,
     parsedBudgetMax: budgetMax,
-    recommendationCopy: `${category.name} is a practical place to start based on when you notice discomfort and the budget you selected. A private chat can help narrow down the most comfortable fit for your routine.`,
+    recommendationCopy: `${category.name} is a practical place to start based on your main comfort need and routine. A private chat can help you discuss fit and suitable alternatives.`,
   };
 }
 
@@ -40,8 +40,8 @@ export function scoreLead(input: AssessmentInput, confidence: number): LeadScore
   let score = 20;
   if (confidence >= 0.7) { score += 25; reasons.push("Strong category match"); }
   else if (confidence >= 0.5) { score += 15; reasons.push("Moderate category match"); }
-  if (budgetMax >= 100) { score += 25; reasons.push("Budget fits core ranges"); }
-  else if (budgetMax >= 50) { score += 15; reasons.push("Active purchase budget"); }
+  if (Number.isFinite(budgetMax) && budgetMax >= 100) { score += 25; reasons.push("Preferred budget shared"); }
+  else if (Number.isFinite(budgetMax) && budgetMax >= 50) { score += 15; reasons.push("Preferred budget shared"); }
   if (input.preferredCategoryId) { score += 15; reasons.push("Expressed category preference"); }
   if (/knee|feet|foot|leg|eye|rest|sleep/i.test(input.comfortConcern)) { score += 15; reasons.push("Specific comfort need"); }
   return { score: Math.min(100, score), reasons };

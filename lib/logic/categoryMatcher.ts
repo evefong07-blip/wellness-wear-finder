@@ -24,11 +24,11 @@ export function matchCategory(
       const concernMatch = keywords.some((keyword) => concern.includes(keyword.toLowerCase()));
       const timingMatch = keywords.some((keyword) => timing.includes(keyword.toLowerCase()));
       const budgetFit = getBudgetFit(category, answers.budget);
-      const budgetScore = budgetFit === "overlaps" || budgetFit === "flexible" ? 2 : 0;
-      const preferenceScore = answers.preferredCategoryId === category.id ? 2 : 0;
+      const budgetScore = budgetFit === "fits" ? 2 : budgetFit === "overlaps" || budgetFit === "flexible" ? 1 : 0;
+      const preferenceScore = answers.preferredCategoryId === category.id ? 4 : 0;
       const score =
-        (concernMatch ? 3 : 0) +
-        (timingMatch ? 1 : 0) +
+        (concernMatch ? 16 : 0) +
+        (timingMatch ? 8 : 0) +
         budgetScore +
         preferenceScore;
       return { category, score };
@@ -40,7 +40,7 @@ export function matchCategory(
   const needsReview = tied || top.score < 3;
   return {
     ...top,
-    confidence: needsReview ? 0.4 : Math.min(1, top.score / 8),
+    confidence: needsReview ? 0.4 : Math.min(1, top.score / 30),
     reviewStatus: needsReview ? "needs-review" : "unreviewed",
   };
 }

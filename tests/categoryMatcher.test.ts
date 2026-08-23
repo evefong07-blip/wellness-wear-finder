@@ -1,75 +1,104 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { matchCategory, parseBudget } from "../lib/logic/categoryMatcher.ts";
-import { describeBudgetFit, formatEstimatedPrice } from "../lib/logic/budget.ts";
-import { buildWhatsAppUrl, normalizeSingaporeNumber } from "../lib/logic/whatsapp.ts";
+import { describeBudgetFit, formatEstimatedPrice, getBudgetFit } from "../lib/logic/budget.ts";
+import { addFittingRequestToWhatsAppUrl, buildWhatsAppUrl, normalizeSingaporeNumber } from "../lib/logic/whatsapp.ts";
 import type { ProductCategory } from "../lib/types.ts";
 
 const categories: ProductCategory[] = [
-  { id: "knee", name: "Knee Supporter", description: "Support", match_keywords: ["knee", "walking", "stairs"], budget_min: 165, budget_max: 165 },
-  { id: "socks", name: "Wellness Socks", description: "Foot comfort", match_keywords: ["feet", "standing", "long day"], budget_min: 70, budget_max: 115 },
-  { id: "eyes", name: "Wellness Eye Mask", description: "Rest", match_keywords: ["eye", "rest", "bedtime"], budget_min: 65, budget_max: 70 },
+  { id: "knee", name: "Knee Supporter", description: "Support", match_keywords: ["knee", "walking", "stairs"], budget_min: 200, budget_max: 220 },
+  { id: "socks", name: "Wellness Socks", description: "Foot comfort", match_keywords: ["feet", "foot", "lower-leg", "standing", "long day"], budget_min: 95, budget_max: 120 },
+  { id: "eyes", name: "Wellness Eye Mask", description: "Rest", match_keywords: ["eye", "rest", "bedtime"], budget_min: 70, budget_max: 80 },
 ];
 
-test("parses common budget ranges", () => {
-  assert.deepEqual(parseBudget("$50-$100"), [50, 100]);
-  assert.deepEqual(parseBudget("under 80"), [0, 80]);
+test("parses every offered budget band", () => {
+  assert.deepEqual(parseBudget("Under S$80"), [0, 80]);
+  assert.deepEqual(parseBudget("S$80–S$120"), [80, 120]);
   assert.deepEqual(parseBudget("S$120–S$180"), [120, 180]);
+  assert.deepEqual(parseBudget("S$180–S$230"), [180, 230]);
+  assert.deepEqual(parseBudget("Flexible / not sure"), [0, Number.POSITIVE_INFINITY]);
 });
 
-test("ranks the success-scenario category deterministically", () => {
-  const result = matchCategory(categories, {
-    concern: "Knee comfort during walking, standing or stairs",
-    timing: "During walking or stairs",
-    budget: "S$120–S$180",
-    preferredCategoryId: null,
-  });
+test("main need and routine keep a knee recommendation above a low budget", () => {
+  const result = matchCategory(categories, { concern: "Knee comfort during walking, standing or stairs", timing: "During walking or stairs", budget: "S$80–S$120", preferredCategoryId: null });
   assert.equal(result.category.name, "Knee Supporter");
-  assert.equal(result.score, 6);
+  assert.equal(result.score, 24);
   assert.equal(result.reviewStatus, "unreviewed");
 });
 
-test("marks weak ties for review", () => {
-  const result = matchCategory(categories, { concern: "other", timing: "varies", budget: "Flexible / not sure", preferredCategoryId: null });
+test("main need outranks a conflicting product preference and budget", () => {
+  const knee = matchCategory(categories, { concern: "Knee comfort during walking, standing or stairs", timing: "During walking or stairs", budget: "S$80–S$120", preferredCategoryId: "socks" });
+  const eyes = matchCategory(categories, { concern: "Resting my eyes or winding down", timing: "During walking or stairs", budget: "S$180–S$230", preferredCategoryId: "knee" });
+  assert.equal(knee.category.name, "Knee Supporter");
+  assert.equal(eyes.category.name, "Wellness Eye Mask");
+});
+
+test("routine outranks preference when the visitor is not sure about the need", () => {
+  const result = matchCategory(categories, { concern: "Not sure yet", timing: "At bedtime or while resting", budget: "S$80–S$120", preferredCategoryId: "socks" });
+  assert.equal(result.category.name, "Wellness Eye Mask");
+});
+
+test("explicit preference guides a genuinely ambiguous answer", () => {
+  const result = matchCategory(categories, { concern: "Not sure yet", timing: "It varies", budget: "Under S$80", preferredCategoryId: "knee" });
+  assert.equal(result.category.name, "Knee Supporter");
+});
+
+test("Help me choose uses budget only as a final fallback", () => {
+  const result = matchCategory(categories, { concern: "Not sure yet", timing: "It varies", budget: "Under S$80", preferredCategoryId: null });
+  assert.equal(result.category.name, "Wellness Eye Mask");
+});
+
+test("flexible and fully ambiguous answers are marked for review", () => {
+  const result = matchCategory(categories, { concern: "Not sure yet", timing: "It varies", budget: "Flexible / not sure", preferredCategoryId: null });
   assert.equal(result.confidence, 0.4);
   assert.equal(result.reviewStatus, "needs-review");
 });
 
-test("builds a Singapore WhatsApp deep link and summary", () => {
-  assert.equal(normalizeSingaporeNumber("8123 4567"), "6581234567");
-  const url = buildWhatsAppUrl({ customerName: "Sarah Tan", whatsappNumber: "81234567", comfortConcern: "Knee comfort", whenAffected: "Walking", budgetRange: "S$120–S$180", preferredCategoryId: null }, categories[0]);
-  assert.match(decodeURIComponent(url), /Sarah Tan/);
-  assert.match(decodeURIComponent(url), /Knee Supporter/);
-});
-
-test("routes enquiries to the distributor instead of the visitor", () => {
-  const url = buildWhatsAppUrl({ customerName: "Sarah Tan", whatsappNumber: "81234567", comfortConcern: "Knee comfort", whenAffected: "Walking", budgetRange: "S$120–S$180", preferredCategoryId: null }, categories[0]);
-  assert.match(url, /^https:\/\/wa\.me\/6580208895\?text=/);
-  assert.doesNotMatch(url, /^https:\/\/wa\.me\/6581234567\?text=/);
-  assert.match(decodeURIComponent(url), /6581234567/);
-});
-
-test("matches the concrete products to their catalogue price ranges", () => {
+test("matches the feet and eye-rest journeys to the correct products", () => {
   const socks = matchCategory(categories, { concern: "Feet or lower-leg comfort", timing: "After long hours standing", budget: "S$80–S$120", preferredCategoryId: null });
   const eyes = matchCategory(categories, { concern: "Resting my eyes", timing: "At bedtime or while resting", budget: "Under S$80", preferredCategoryId: null });
   assert.equal(socks.category.name, "Wellness Socks");
   assert.equal(eyes.category.name, "Wellness Eye Mask");
 });
 
-test("a deliberate product choice remains a recommendation signal despite a mismatch", () => {
-  const result = matchCategory(categories, { concern: "Not sure yet", timing: "It varies", budget: "Under S$80", preferredCategoryId: "knee" });
-  assert.equal(result.category.name, "Knee Supporter");
+test("uses the correct catalogue prices and precise budget comparisons", () => {
+  assert.equal(formatEstimatedPrice(categories[0]), "Estimated price range: S$200–S$220");
+  assert.equal(formatEstimatedPrice(categories[1]), "Estimated price range: S$95–S$120");
+  assert.equal(formatEstimatedPrice(categories[2]), "Estimated price range: S$70–S$80");
+  assert.equal(getBudgetFit(categories[0], "S$180–S$230"), "fits");
+  assert.equal(getBudgetFit(categories[1], "S$80–S$120"), "fits");
+  assert.equal(getBudgetFit(categories[1], "S$120–S$180"), "overlaps");
+  assert.equal(getBudgetFit(categories[2], "Under S$80"), "fits");
+  assert.equal(getBudgetFit(categories[0], "S$80–S$120"), "outside");
 });
 
-test("shows estimated prices and explicitly explains an outside budget", () => {
-  assert.equal(formatEstimatedPrice(categories[0]), "Estimated price: S$165");
-  assert.equal(formatEstimatedPrice(categories[1]), "Estimated price range: S$70–S$115");
-  assert.match(describeBudgetFit(categories[2], "S$180–S$230"), /outside your selected range/);
-  assert.doesNotMatch(describeBudgetFit(categories[2], "S$180–S$230"), /aligned/i);
+test("explains above, below, overlap and fit without false alignment language", () => {
+  const above = describeBudgetFit(categories[0], "S$80–S$120");
+  const below = describeBudgetFit(categories[2], "S$180–S$230", true);
+  assert.equal(above, "This Knee Supporter recommendation is typically S$200–S$220, which is above your preferred budget. Evelyn can discuss alternatives or help you decide whether it is suitable.");
+  assert.equal(below, "Your selected product is typically S$70–S$80, which is below your preferred budget. Evelyn can discuss alternatives or help you decide whether it is suitable.");
+  assert.match(describeBudgetFit(categories[1], "S$120–S$180"), /overlaps/);
+  assert.match(describeBudgetFit(categories[1], "S$80–S$120"), /fits within/);
+  for (const message of [above, below]) assert.doesNotMatch(message, /aligned/i);
 });
 
-test("explains an explicitly selected product above budget without claiming alignment", () => {
-  const message = describeBudgetFit(categories[0], "Under S$80", true);
-  assert.equal(message, "Your selected product is typically S$165, which is above your preferred budget. Evelyn can discuss alternatives or help you decide whether it is suitable.");
-  assert.doesNotMatch(message, /aligned/i);
+test("routes WhatsApp to the distributor with answers, product and catalogue price", () => {
+  assert.equal(normalizeSingaporeNumber("8123 4567"), "6581234567");
+  const url = buildWhatsAppUrl({ customerName: "Sarah Tan", whatsappNumber: "81234567", comfortConcern: "Knee comfort", whenAffected: "Walking", budgetRange: "S$80–S$120", preferredCategoryId: null }, categories[0]);
+  const decoded = decodeURIComponent(url);
+  assert.match(url, /^https:\/\/wa\.me\/6580208895\?text=/);
+  assert.doesNotMatch(url, /^https:\/\/wa\.me\/6581234567\?text=/);
+  assert.match(decoded, /Sarah Tan/);
+  assert.match(decoded, /Knee Supporter/);
+  assert.match(decoded, /S\$200–S\$220/);
+  assert.match(decoded, /6581234567/);
+  assert.match(decoded, /Requested next step: WhatsApp follow-up/);
+});
+
+test("adds a saved private-fitting request to the WhatsApp summary", () => {
+  const base = buildWhatsAppUrl({ customerName: "Sarah", whatsappNumber: "81234567", comfortConcern: "Feet", whenAffected: "After a long day", budgetRange: "S$80–S$120", preferredCategoryId: "socks" }, categories[1]);
+  const updated = addFittingRequestToWhatsAppUrl(base, "2026-08-24T14:00");
+  const parsed = new URL(updated);
+  assert.match(parsed.searchParams.get("text") ?? "", /Private fitting requested: 2026-08-24 at 14:00/);
+  assert.equal(parsed.pathname, "/6580208895");
 });

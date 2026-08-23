@@ -5,6 +5,7 @@ import { submitFittingRequest } from "@/app/actions";
 import type { AssessmentResult } from "@/lib/types";
 import { combinePreferredDateTime, singaporeDateValue } from "@/lib/logic/form";
 import { describeBudgetFit, formatEstimatedPrice, getBudgetFit } from "@/lib/logic/budget";
+import { addFittingRequestToWhatsAppUrl } from "@/lib/logic/whatsapp";
 
 const fittingTimes = Array.from({ length: 25 }, (_, index) => {
   const totalMinutes = 9 * 60 + index * 30;
@@ -24,6 +25,7 @@ export function ResultCard({ result, onRestart }: { result: AssessmentResult; on
   const [isPending, startTransition] = useTransition();
   const preferredTime = combinePreferredDateTime(preferredDate, preferredClock);
   const budgetFit = getBudgetFit(result.category, result.budgetRange);
+  const whatsappUrl = saved ? addFittingRequestToWhatsAppUrl(result.whatsappUrl, preferredTime) : result.whatsappUrl;
 
   function saveFitting() {
     setError("");
@@ -45,7 +47,7 @@ export function ResultCard({ result, onRestart }: { result: AssessmentResult; on
       <p className="result-description">{result.recommendationCopy || result.category.description}</p>
       <div className={`price-summary ${budgetFit === "outside" ? "outside" : ""}`}><strong>{formatEstimatedPrice(result.category)}</strong><p>{describeBudgetFit(result.category, result.budgetRange, result.category.id === result.preferredCategoryId)}</p></div>
       <div className="match-note"><span>Why this match</span><p>Your comfort need and routine aligned most closely with this category. This is practical guidance, not medical advice.</p></div>
-      <a className="button whatsapp" href={result.whatsappUrl} target="_blank" rel="noreferrer" onClick={() => { void fetch("/api/events", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ eventType: "whatsapp_clicked", assessmentId: result.assessmentId }), keepalive: true }); }}>Continue on WhatsApp <span>↗</span></a>
+      <a className="button whatsapp" href={whatsappUrl} target="_blank" rel="noreferrer" onClick={() => { void fetch("/api/events", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ eventType: "whatsapp_clicked", assessmentId: result.assessmentId }), keepalive: true }); }}>Continue on WhatsApp <span>↗</span></a>
       {!saved && <button className="button fitting" type="button" onClick={() => setShowFitting((value) => !value)}>Request a private fitting</button>}
       {showFitting && !saved && <div className="fitting-form">
         <div className="fitting-fields">

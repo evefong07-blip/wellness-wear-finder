@@ -5,7 +5,7 @@ import { buildDashboardStats } from "../lib/logic/dashboard.ts";
 import type { AssessmentInput, AssessmentRow, ProductCategory } from "../lib/types.ts";
 
 const input: AssessmentInput = { customerName: "Sarah", whatsappNumber: "81234567", comfortConcern: "Knee comfort during walking", whenAffected: "During walking or stairs", budgetRange: "S$120–S$180", preferredCategoryId: "knee" };
-const category: ProductCategory = { id: "knee", name: "Knee Supporter", description: "Support", match_keywords: ["knee"], budget_min: 165, budget_max: 165 };
+const category: ProductCategory = { id: "knee", name: "Knee Supporter", description: "Support", match_keywords: ["knee"], budget_min: 200, budget_max: 220 };
 
 test("structures messy assessment answers without AI", () => {
   const result = structureAssessment(input, category);
@@ -19,6 +19,7 @@ test("lead score rewards specific, high-confidence intent", () => {
   const result = scoreLead(input, 0.8);
   assert.equal(result.score, 100);
   assert.ok(result.reasons.includes("Strong category match"));
+  assert.ok(result.reasons.includes("Preferred budget shared"));
 });
 
 test("dashboard aggregates ranked assessment data", () => {

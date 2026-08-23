@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { NavLinks } from "@/components/NavLinks";
 import "./globals.css";
 
@@ -16,7 +17,7 @@ export default function RootLayout({
     <html lang="en">
       <body>
         <header className="site-header">
-          <a className="brand" href="/"><span className="brand-mark">W</span><span>Wellness Wear<small>Finder</small></span></a>
+          <Link className="brand" href="/"><span className="brand-mark">W</span><span>Wellness Wear<small>Finder</small></span></Link>
           <NavLinks />
         </header>
         {children}

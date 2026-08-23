@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import { LoginForm } from "@/components/LoginForm";
 import { createClient } from "@/lib/supabase/server";
 
@@ -20,7 +21,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
       <h1>Welcome back.</h1>
       <p>Enter the approved distributor email to receive a secure, password-free sign-in link.</p>
       <LoginForm unauthorized={params.error === "unauthorized"} />
-      <a className="login-back" href="/">← Return to public assessment</a>
+      <Link className="login-back" href="/">← Return to public assessment</Link>
     </section>
   </main>;
 }

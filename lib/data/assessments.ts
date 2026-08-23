@@ -1,50 +1,35 @@
 import { createClient } from "@/lib/supabase/server";
-import type { AssessmentInput, AssessmentRow, ProductCategory } from "@/lib/types";
+import type { AssessmentRow } from "@/lib/types";
+import { assertDatabaseConfigured, buildAssessmentRecord, type AssessmentSubmission } from "@/lib/logic/submission";
 
-type CreateAssessmentArgs = AssessmentInput & {
-  suggestedCategory: ProductCategory;
-  suggestionConfidence: number;
-  reviewStatus: "unreviewed" | "needs-review";
-  suggestionSource: "rule" | "ai";
-  parsedConcern: string;
-  parsedTiming: string;
-  parsedBudgetMin: number;
-  parsedBudgetMax: number;
-  recommendationCopy: string;
-  leadScore: number;
-  leadScoreReasons: string[];
+type AssessmentQueryRow = {
+  id: string;
+  customer_name: string;
+  whatsapp_number: string;
+  comfort_concern: string | null;
+  when_affected: string | null;
+  budget_range: string | null;
+  suggestion_source: string | null;
+  suggestion_confidence: number | string | null;
+  review_status: string | null;
+  preferred_next_step: string | null;
+  fitting_preferred_time: string | null;
+  created_at: string;
+  parsed_concern: string | null;
+  recommendation_copy: string | null;
+  lead_score: number | string | null;
+  lead_score_reasons: string[] | null;
+  suggested_category: { name: string } | { name: string }[] | null;
 };
 
-export async function createAssessment(input: CreateAssessmentArgs): Promise<string> {
-  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
-    throw new Error("The database environment is not configured yet.");
-  }
+export async function createAssessment(input: AssessmentSubmission): Promise<string> {
+  assertDatabaseConfigured(process.env);
 
   const assessmentId = crypto.randomUUID();
   const supabase = await createClient();
   const { error } = await supabase
     .from("assessments")
-    .insert({
-      id: assessmentId,
-      customer_name: input.customerName.trim(),
-      whatsapp_number: input.whatsappNumber,
-      comfort_concern: input.comfortConcern,
-      when_affected: input.whenAffected,
-      preferred_category_id: input.preferredCategoryId,
-      budget_range: input.budgetRange,
-      suggested_category_id: input.suggestedCategory.id,
-      suggestion_source: input.suggestionSource,
-      suggestion_confidence: input.suggestionConfidence,
-      review_status: input.reviewStatus,
-      preferred_next_step: "whatsapp",
-      parsed_concern: input.parsedConcern,
-      parsed_timing: input.parsedTiming,
-      parsed_budget_min: input.parsedBudgetMin,
-      parsed_budget_max: input.parsedBudgetMax,
-      recommendation_copy: input.recommendationCopy,
-      lead_score: input.leadScore,
-      lead_score_reasons: input.leadScoreReasons,
-    });
+    .insert(buildAssessmentRecord(input, assessmentId));
 
   if (error) throw new Error(`Could not save your assessment: ${error.message}`);
   return assessmentId;
@@ -69,8 +54,8 @@ export async function getAssessments(): Promise<AssessmentRow[]> {
     .limit(100);
   if (error) throw new Error(`Could not load assessments: ${error.message}`);
 
-  return (data ?? []).map((row) => {
-    const joined = row.suggested_category as unknown as { name: string } | { name: string }[] | null;
+  return (data ?? []).map((row: AssessmentQueryRow) => {
+    const joined = row.suggested_category;
     const category = Array.isArray(joined) ? joined[0]?.name : joined?.name;
     return {
       id: row.id,

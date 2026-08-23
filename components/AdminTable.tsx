@@ -1,5 +1,6 @@
 import type { AssessmentRow } from "@/lib/types";
 import { markContacted } from "@/app/admin/actions";
+import Link from "next/link";
 
 function formatDate(value: string) {
   return new Intl.DateTimeFormat("en-SG", { dateStyle: "medium", timeStyle: "short", timeZone: "Asia/Singapore" }).format(new Date(value));
@@ -7,7 +8,7 @@ function formatDate(value: string) {
 
 export function AdminTable({ assessments }: { assessments: AssessmentRow[] }) {
   if (!assessments.length) {
-    return <div className="empty-state"><span>◎</span><h2>No assessments yet</h2><p>New completed assessments will appear here automatically.</p><a className="button primary" href="/">Open assessment</a></div>;
+    return <div className="empty-state"><span>◎</span><h2>No assessments yet</h2><p>New completed assessments will appear here automatically.</p><Link className="button primary" href="/">Open assessment</Link></div>;
   }
 
   return (

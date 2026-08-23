@@ -1,6 +1,6 @@
 import type { ProductCategory } from "../types.ts";
 
-export type BudgetFit = "overlaps" | "outside" | "flexible" | "unknown";
+export type BudgetFit = "fits" | "overlaps" | "outside" | "flexible" | "unknown";
 
 export function parseBudget(range: string): [number, number] {
   const values = range.match(/\d+/g)?.map(Number) ?? [];
@@ -17,7 +17,9 @@ export function getBudgetFit(category: ProductCategory, range: string): BudgetFi
   if (!range.match(/\d/)) return "flexible";
   if (category.budget_min === null || category.budget_max === null) return "unknown";
   const [budgetMin, budgetMax] = parseBudget(range);
-  return budgetMax >= category.budget_min && budgetMin <= category.budget_max ? "overlaps" : "outside";
+  if (category.budget_min >= budgetMin && category.budget_max <= budgetMax) return "fits";
+  if (budgetMax >= category.budget_min && budgetMin <= category.budget_max) return "overlaps";
+  return "outside";
 }
 
 export function formatEstimatedPrice(category: ProductCategory): string {
@@ -35,12 +37,13 @@ export function formatPriceAmount(category: ProductCategory): string {
 export function describeBudgetFit(category: ProductCategory, range: string, deliberatelySelected = false): string {
   const fit = getBudgetFit(category, range);
   if (fit === "flexible") return "You selected a flexible budget, so your comfort needs and routine guided this match.";
+  if (fit === "fits") return `The estimated price fits within your selected range (${range}).`;
   if (fit === "overlaps") return `The estimated price overlaps your selected range (${range}).`;
-  if (fit === "outside" && deliberatelySelected) {
+  if (fit === "outside") {
     const [budgetMin, budgetMax] = parseBudget(range);
     const direction = category.budget_min !== null && category.budget_min > budgetMax ? "above" : category.budget_max !== null && category.budget_max < budgetMin ? "below" : "outside";
-    return `Your selected product is typically ${formatPriceAmount(category)}, which is ${direction} your preferred budget. Evelyn can discuss alternatives or help you decide whether it is suitable.`;
+    const subject = deliberatelySelected ? "Your selected product" : `This ${category.name} recommendation`;
+    return `${subject} is typically ${formatPriceAmount(category)}, which is ${direction} your preferred budget. Evelyn can discuss alternatives or help you decide whether it is suitable.`;
   }
-  if (fit === "outside") return `The estimated price is outside your selected range (${range}). Evelyn can discuss alternatives or help you decide whether this match is suitable.`;
   return "Ask the distributor to confirm the price before deciding.";
 }

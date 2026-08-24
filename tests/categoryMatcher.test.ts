@@ -79,6 +79,7 @@ test("explains above, below, overlap and fit without false alignment language", 
   assert.equal(below, "Your selected product is typically S$70–S$80, which is below your preferred budget. Evelyn can discuss alternatives or help you decide whether it is suitable.");
   assert.match(describeBudgetFit(categories[1], "S$120–S$180"), /overlaps/);
   assert.match(describeBudgetFit(categories[1], "S$80–S$120"), /fits within/);
+  assert.equal(describeBudgetFit(categories[0], "Flexible / not sure", true), "You selected a flexible budget, so we kept your product preference as the starting point.");
   for (const message of [above, below]) assert.doesNotMatch(message, /aligned/i);
 });
 

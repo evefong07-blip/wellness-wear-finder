@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { submitFittingRequest } from "@/app/actions";
+import { submitFittingRequest } from "@/lib/client/assessmentApi";
 import type { AssessmentResult } from "@/lib/types";
 import { combinePreferredDateTime, singaporeDateValue } from "@/lib/logic/form";
 import { describeBudgetFit, formatEstimatedPrice, getBudgetFit } from "@/lib/logic/budget";
@@ -51,6 +51,13 @@ export function ResultCard({ result, onRestart }: { result: AssessmentResult; on
     });
   }
 
+  function cancelFitting() {
+    setShowFitting(false);
+    setPreferredDate("");
+    setPreferredClock("");
+    setError("");
+  }
+
   return (
     <section className="assessment-card result-card" aria-live="polite">
       <div className="result-icon">{isConsultation ? "?" : "✓"}</div>
@@ -74,7 +81,7 @@ export function ResultCard({ result, onRestart }: { result: AssessmentResult; on
           <label>Preferred time<select aria-label="Preferred time" value={preferredClock} onChange={(event) => setPreferredClock(event.currentTarget.value)}><option value="">Choose a time</option>{fittingTimes.map((time) => <option key={time.value} value={time.value}>{time.label}</option>)}</select></label>
         </div>
         {error && <div className="error-banner" role="alert">{error}</div>}
-        <button type="button" className="button primary" onClick={saveFitting} disabled={!preferredTime || isPending}>{isPending ? "Saving…" : "Save fitting request"}</button>
+        <div className="fitting-form-actions"><button type="button" className="button primary" onClick={saveFitting} disabled={!preferredTime || isPending}>{isPending ? "Saving…" : "Save fitting request"}</button><button type="button" className="button secondary" onClick={cancelFitting} disabled={isPending}>Cancel</button></div>
       </div>}
       {saved && <><div className="success-banner" role="status"><strong>Fitting request saved.</strong><span>{showOpenFallback ? "Use the button below to open your prepared WhatsApp request." : "Your prepared WhatsApp request has opened for you to review."}</span></div>{showOpenFallback && <a className="button fitting" href={fittingWhatsAppUrl} target="_blank" rel="noreferrer">Open fitting request in WhatsApp <span>↗</span></a>}</>}
       <p className="result-footnote">Your assessment has been saved. The message opens in your WhatsApp for you to review before sending.</p>

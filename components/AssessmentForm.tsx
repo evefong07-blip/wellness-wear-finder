@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useTransition } from "react";
 import Image from "next/image";
-import { submitAssessment } from "@/app/actions";
+import { submitAssessmentRequest } from "@/lib/client/assessmentApi";
 import type { AssessmentInput, AssessmentResult, ProductCategory } from "@/lib/types";
 import { ResultCard } from "@/components/ResultCard";
 import { matchCategory } from "@/lib/logic/categoryMatcher";
@@ -77,7 +77,7 @@ export function AssessmentForm({ categories }: { categories: ProductCategory[] }
     setError("");
     startTransition(async () => {
       try {
-        setResult(await submitAssessment(values));
+        setResult(await submitAssessmentRequest(values));
       } catch (reason) {
         setError(reason instanceof Error ? reason.message : "Something went wrong. Please try again.");
       }

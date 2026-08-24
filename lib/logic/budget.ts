@@ -36,7 +36,9 @@ export function formatPriceAmount(category: ProductCategory): string {
 
 export function describeBudgetFit(category: ProductCategory, range: string, deliberatelySelected = false): string {
   const fit = getBudgetFit(category, range);
-  if (fit === "flexible") return "You selected a flexible budget, so your comfort needs and routine guided this match.";
+  if (fit === "flexible") return deliberatelySelected
+    ? "You selected a flexible budget, so we kept your product preference as the starting point."
+    : "You selected a flexible budget, so your comfort needs and routine guided this match.";
   if (fit === "fits") return `The estimated price fits within your selected range (${range}).`;
   if (fit === "overlaps") return `The estimated price overlaps your selected range (${range}).`;
   if (fit === "outside") {
